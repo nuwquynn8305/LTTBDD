@@ -1,0 +1,26 @@
+[33m1faab6c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m docs: add comprehensive assignment completion checklist
+[33mbb0bc5c[m docs: add month/year picker fix documentation
+[33m06eb6fd[m Done
+[33m2772db2[m ui: remove rupee symbol from amount input fields
+[33mf5755b4[m docs: add budget loader fix documentation
+[33m2b09de5[m fix: replace FutureProvider with StateNotifier for budgets
+[33m198d93d[m docs: add final project completion status
+[33m30209a2[m fix: resolve budget provider loading issue
+[33m98da839[m debug: add debug output to track budget loading issue
+[33m27387b2[m fix: add initialization flags to prevent race conditions
+[33m2322fa0[m fix: simplify Hive initialization to prevent hanging
+[33m6ec1d0d[m fix: improve Hive initialization and budgets screen error handling
+[33m57531b2[m fix: ensure Hive boxes are initialized before access
+[33me5157fe[m docs: add circular loader fix documentation
+[33m53368dc[m fix: implement StorageService as singleton
+[33m1dbc506[m docs: add fix summary for infinite loading issue
+[33m4d10301[m fix: resolve infinite loading issue when no data exists
+[33m352b52a[m docs: add completion status report
+[33m5bf10c4[m docs: add setup guide and submission checklist
+[33ma0fc1fb[m chore: add platform configuration files
+[33m2ba7e63[m test: add comprehensive test suite
+[33m61f8734[m feat: build UI with dashboard and transactions
+[33mfe60e1d[m feat: implement Riverpod state management
+[33m146116f[m feat: implement Hive storage service
+[33m6b6c97b[m feat: implement data models with Hive adapters
+[33m79e051b[m feat: setup project with dependencies
