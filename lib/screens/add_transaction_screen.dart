@@ -71,7 +71,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           widget.transaction?.id ??
           DateTime.now().millisecondsSinceEpoch.toString(),
       title: _titleController.text,
-      amount: double.parse(_amountController.text),
+      amount: double.parse(_amountController.text.replaceAll('.', '').replaceAll(',', '')),
       category: _selectedCategory,
       date: _selectedDate,
       type: _selectedType,
@@ -160,15 +160,17 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 controller: _amountController,
                 decoration: const InputDecoration(
                   labelText: 'Số tiền',
-                  prefixIcon: Icon(Icons.currency_rupee),
+                  prefixIcon: Icon(Icons.attach_money),
+                  suffixText: '₫',
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Vui lòng nhập số tiền';
                   }
-                  if (double.tryParse(value) == null ||
-                      double.parse(value) <= 0) {
+                  final cleanValue = value.replaceAll('.', '').replaceAll(',', '');
+                  if (double.tryParse(cleanValue) == null ||
+                      double.parse(cleanValue) <= 0) {
                     return 'Vui lòng nhập số tiền hợp lệ';
                   }
                   return null;

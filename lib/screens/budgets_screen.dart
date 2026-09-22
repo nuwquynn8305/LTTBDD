@@ -12,9 +12,10 @@ class BudgetsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final now = DateTime.now();
+    final currentMonth = DateTime(now.year, now.month);
     final budgetsAsync = ref.watch(budgetsByMonthProvider);
-    final spendingAsync = ref.watch(expenseByCategoryProvider(now));
-    final budgetStatusAsync = ref.watch(budgetStatusProvider(now));
+    final spendingAsync = ref.watch(expenseByCategoryProvider(currentMonth));
+    final budgetStatusAsync = ref.watch(budgetStatusProvider(currentMonth));
 
     return Scaffold(
       body: Column(
@@ -99,7 +100,7 @@ class BudgetsScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                '₹${NumberFormat('#,##,###').format(spent)} / ₹${NumberFormat('#,##,###').format(budget.limit)}',
+                                '${NumberFormat('#,##,###').format(spent)} ₫ / ${NumberFormat('#,##,###').format(budget.limit)} ₫',
                                 style: TextStyle(
                                   color: isOverBudget
                                       ? Colors.red
@@ -108,7 +109,7 @@ class BudgetsScreen extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                'Còn lại: ₹${NumberFormat('#,##,###').format(remaining)}',
+                                'Còn lại: ${NumberFormat('#,##,###').format(remaining)} ₫',
                                 style: TextStyle(
                                   color: isOverBudget
                                       ? Colors.red

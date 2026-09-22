@@ -171,7 +171,7 @@ class _TransactionList extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${isIncome ? '+' : '-'}₹${NumberFormat('#,##,###').format(transaction.amount)}',
+                  '${isIncome ? '+' : '-'}${NumberFormat('#,##,###').format(transaction.amount)} ₫',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: color,

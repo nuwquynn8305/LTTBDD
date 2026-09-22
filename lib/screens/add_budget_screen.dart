@@ -142,7 +142,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
           widget.budget?.id ??
           '${_selectedCategory}_${_selectedMonth}_${_selectedYear}',
       category: _selectedCategory,
-      limit: double.parse(_amountController.text),
+      limit: double.parse(_amountController.text.replaceAll('.', '').replaceAll(',', '')),
       month: _selectedMonth,
       year: _selectedYear,
     );
@@ -206,15 +206,17 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                 controller: _amountController,
                 decoration: const InputDecoration(
                   labelText: 'Giới hạn ngân sách',
-                  prefixIcon: Icon(Icons.currency_rupee),
+                  prefixIcon: Icon(Icons.attach_money),
+                  suffixText: '₫',
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Vui lòng nhập giới hạn ngân sách';
                   }
-                  if (double.tryParse(value) == null ||
-                      double.parse(value) <= 0) {
+                  final cleanValue = value.replaceAll('.', '').replaceAll(',', '');
+                  if (double.tryParse(cleanValue) == null ||
+                      double.parse(cleanValue) <= 0) {
                     return 'Vui lòng nhập số tiền hợp lệ';
                   }
                   return null;

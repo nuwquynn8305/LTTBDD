@@ -32,7 +32,7 @@ class BalanceCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '₹${NumberFormat('#,##,###').format(balance)}',
+                  '${NumberFormat('#,##,###').format(balance)} ₫',
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -122,7 +122,7 @@ class _StatItem extends StatelessWidget {
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
             ),
             Text(
-              '₹${NumberFormat('#,##,###').format(amount)}',
+              '${NumberFormat('#,##,###').format(amount)} ₫',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
