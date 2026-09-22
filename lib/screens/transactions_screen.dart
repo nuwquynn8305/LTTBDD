@@ -29,12 +29,12 @@ class TransactionsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'No transactions yet',
+                      'Chưa có giao dịch nào',
                       style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Tap the + button to add your first transaction',
+                      'Nhấn nút + để thêm giao dịch đầu tiên',
                       style: TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -59,8 +59,8 @@ class TransactionsScreen extends ConsumerWidget {
                       children: [
                         const TabBar(
                           tabs: [
-                            Tab(text: 'Expenses'),
-                            Tab(text: 'Income'),
+                            Tab(text: 'Khoản chi'),
+                            Tab(text: 'Khoản thu'),
                           ],
                         ),
                         Expanded(
@@ -83,7 +83,7 @@ class TransactionsScreen extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('Error: $error')),
+          error: (error, stack) => Center(child: Text('Lỗi: $error')),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -96,7 +96,7 @@ class TransactionsScreen extends ConsumerWidget {
           );
         },
         icon: const Icon(Icons.add),
-        label: const Text('Add Transaction'),
+        label: const Text('Thêm giao dịch'),
       ),
     );
   }
@@ -130,18 +130,18 @@ class _TransactionList extends ConsumerWidget {
             final confirmed = await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text('Delete Transaction'),
+                title: const Text('Xóa giao dịch'),
                 content: const Text(
-                  'Are you sure you want to delete this transaction?',
+                  'Bạn có chắc chắn muốn xóa giao dịch này không?',
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Cancel'),
+                    child: const Text('Hủy'),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
-                    child: const Text('Delete'),
+                    child: const Text('Xóa'),
                   ),
                 ],
               ),

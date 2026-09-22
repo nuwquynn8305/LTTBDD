@@ -74,22 +74,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
             selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+            label: 'Tổng quan',
           ),
           NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
             selectedIcon: Icon(Icons.receipt_long),
-            label: 'Transactions',
+            label: 'Giao dịch',
           ),
           NavigationDestination(
             icon: Icon(Icons.account_balance_wallet_outlined),
             selectedIcon: Icon(Icons.account_balance_wallet),
-            label: 'Budgets',
+            label: 'Ngân sách',
           ),
         ],
       ),
       appBar: AppBar(
-        title: const Text('Expense Tracker'),
+        title: const Text('Quản lý chi tiêu'),
         actions: [
           IconButton(
             icon: const Icon(Icons.brightness_6),

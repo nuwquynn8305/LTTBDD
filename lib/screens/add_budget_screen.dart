@@ -45,7 +45,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final selectedMonth = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Month'),
+        title: const Text('Chọn tháng'),
         content: SizedBox(
           width: 300,
           height: 300,
@@ -57,7 +57,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             itemCount: 12,
             itemBuilder: (context, index) {
               final month = index + 1;
-              final monthName = DateFormat('MMM').format(DateTime(2024, month));
+              final monthName = 'Tháng $month';
               final isSelected = month == _selectedMonth;
 
               return InkWell(
@@ -90,7 +90,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
         ],
       ),
@@ -102,7 +102,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final selectedYear = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Year'),
+        title: const Text('Chọn năm'),
         content: SizedBox(
           width: 300,
           height: 300,
@@ -118,7 +118,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
         ],
       ),
@@ -162,7 +162,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.budget == null ? 'Add Budget' : 'Edit Budget'),
+        title: Text(widget.budget == null ? 'Thêm ngân sách' : 'Sửa ngân sách'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -175,7 +175,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
                 decoration: const InputDecoration(
-                  labelText: 'Category',
+                  labelText: 'Danh mục',
                   prefixIcon: Icon(Icons.category),
                 ),
                 items: Categories.expenseCategories.map((category) {
@@ -205,17 +205,17 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
               TextFormField(
                 controller: _amountController,
                 decoration: const InputDecoration(
-                  labelText: 'Budget Limit',
+                  labelText: 'Giới hạn ngân sách',
                   prefixIcon: Icon(Icons.currency_rupee),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a budget limit';
+                    return 'Vui lòng nhập giới hạn ngân sách';
                   }
                   if (double.tryParse(value) == null ||
                       double.parse(value) <= 0) {
-                    return 'Please enter a valid amount';
+                    return 'Vui lòng nhập số tiền hợp lệ';
                   }
                   return null;
                 },
@@ -227,13 +227,11 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                 onTap: _selectMonthYear,
                 child: InputDecorator(
                   decoration: const InputDecoration(
-                    labelText: 'Month & Year',
+                    labelText: 'Tháng & Năm',
                     prefixIcon: Icon(Icons.calendar_today),
                   ),
                   child: Text(
-                    DateFormat(
-                      'MMMM yyyy',
-                    ).format(DateTime(_selectedYear, _selectedMonth)),
+                    'Tháng $_selectedMonth/$_selectedYear',
                   ),
                 ),
               ),
@@ -246,7 +244,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                   onPressed: _saveBudget,
                   icon: const Icon(Icons.save),
                   label: Text(
-                    widget.budget == null ? 'Add Budget' : 'Update Budget',
+                    widget.budget == null ? 'Thêm ngân sách' : 'Cập nhật ngân sách',
                   ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),

@@ -23,7 +23,7 @@ class RecentTransactionsWidget extends ConsumerWidget {
               padding: EdgeInsets.all(20),
               child: Center(
                 child: Text(
-                  'No transactions yet',
+                  'Chưa có giao dịch nào',
                   style: TextStyle(color: Colors.grey),
                 ),
               ),
@@ -40,12 +40,12 @@ class RecentTransactionsWidget extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Recent Transactions',
+                    'Giao dịch gần đây',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   TextButton(
                     onPressed: onViewAll,
-                    child: const Text('View All'),
+                    child: const Text('Xem tất cả'),
                   ),
                 ],
               ),
@@ -65,7 +65,7 @@ class RecentTransactionsWidget extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) =>
-          const Center(child: Text('Error loading transactions')),
+          const Center(child: Text('Lỗi khi tải giao dịch')),
     );
   }
 }
@@ -94,18 +94,18 @@ class TransactionTile extends ConsumerWidget {
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Delete Transaction'),
+            title: const Text('Xóa giao dịch'),
             content: const Text(
-              'Are you sure you want to delete this transaction?',
+              'Bạn có chắc chắn muốn xóa giao dịch này không?',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: const Text('Hủy'),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Delete'),
+                child: const Text('Xóa'),
               ),
             ],
           ),

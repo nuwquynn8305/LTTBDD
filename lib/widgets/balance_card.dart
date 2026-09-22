@@ -23,7 +23,7 @@ class BalanceCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Current Balance',
+                  'Số dư hiện tại',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -44,7 +44,7 @@ class BalanceCard extends ConsumerWidget {
                   children: [
                     incomeAsync.when(
                       data: (income) => _StatItem(
-                        label: 'Income',
+                        label: 'Thu nhập',
                         amount: income,
                         color: Colors.green,
                         icon: Icons.arrow_downward,
@@ -54,11 +54,11 @@ class BalanceCard extends ConsumerWidget {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                      error: (_, __) => const Text('Error'),
+                      error: (_, __) => const Text('Lỗi'),
                     ),
                     expensesAsync.when(
                       data: (expenses) => _StatItem(
-                        label: 'Expenses',
+                        label: 'Chi tiêu',
                         amount: expenses,
                         color: Colors.red,
                         icon: Icons.arrow_upward,
@@ -68,7 +68,7 @@ class BalanceCard extends ConsumerWidget {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                      error: (_, __) => const Text('Error'),
+                      error: (_, __) => const Text('Lỗi'),
                     ),
                   ],
                 ),
@@ -88,7 +88,7 @@ class BalanceCard extends ConsumerWidget {
         margin: const EdgeInsets.all(16),
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: Text('Error: $error'),
+          child: Text('Lỗi: $error'),
         ),
       ),
     );

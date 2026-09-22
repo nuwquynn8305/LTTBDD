@@ -98,7 +98,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.transaction == null ? 'Add Transaction' : 'Edit Transaction',
+          widget.transaction == null ? 'Thêm giao dịch' : 'Sửa giao dịch',
         ),
       ),
       body: SingleChildScrollView(
@@ -110,7 +110,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             children: [
               // Transaction Type
               const Text(
-                'Type',
+                'Loại',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -118,12 +118,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 segments: const [
                   ButtonSegment(
                     value: 'expense',
-                    label: Text('Expense'),
+                    label: Text('Khoản chi'),
                     icon: Icon(Icons.arrow_upward),
                   ),
                   ButtonSegment(
                     value: 'income',
-                    label: Text('Income'),
+                    label: Text('Khoản thu'),
                     icon: Icon(Icons.arrow_downward),
                   ),
                 ],
@@ -143,12 +143,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
-                  labelText: 'Title',
+                  labelText: 'Tiêu đề',
                   prefixIcon: Icon(Icons.title),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
+                    return 'Vui lòng nhập tiêu đề';
                   }
                   return null;
                 },
@@ -159,17 +159,17 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               TextFormField(
                 controller: _amountController,
                 decoration: const InputDecoration(
-                  labelText: 'Amount',
+                  labelText: 'Số tiền',
                   prefixIcon: Icon(Icons.currency_rupee),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter an amount';
+                    return 'Vui lòng nhập số tiền';
                   }
                   if (double.tryParse(value) == null ||
                       double.parse(value) <= 0) {
-                    return 'Please enter a valid amount';
+                    return 'Vui lòng nhập số tiền hợp lệ';
                   }
                   return null;
                 },
@@ -180,7 +180,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
                 decoration: const InputDecoration(
-                  labelText: 'Category',
+                  labelText: 'Danh mục',
                   prefixIcon: Icon(Icons.category),
                 ),
                 items:
@@ -216,10 +216,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 onTap: _selectDate,
                 child: InputDecorator(
                   decoration: const InputDecoration(
-                    labelText: 'Date',
+                    labelText: 'Ngày',
                     prefixIcon: Icon(Icons.calendar_today),
                   ),
-                  child: Text(DateFormat('MMM dd, yyyy').format(_selectedDate)),
+                  child: Text(DateFormat('dd/MM/yyyy').format(_selectedDate)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -228,7 +228,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               TextFormField(
                 controller: _notesController,
                 decoration: const InputDecoration(
-                  labelText: 'Notes (Optional)',
+                  labelText: 'Ghi chú (Tùy chọn)',
                   prefixIcon: Icon(Icons.note),
                 ),
                 maxLines: 3,
@@ -243,8 +243,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   icon: const Icon(Icons.save),
                   label: Text(
                     widget.transaction == null
-                        ? 'Add Transaction'
-                        : 'Update Transaction',
+                        ? 'Thêm giao dịch'
+                        : 'Cập nhật giao dịch',
                   ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),

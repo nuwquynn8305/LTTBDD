@@ -23,7 +23,7 @@ class BudgetsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
-              'Budgets - ${DateFormat('MMMM yyyy').format(now)}',
+              'Ngân sách - ${DateFormat('MMMM yyyy').format(now)}',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -44,12 +44,12 @@ class BudgetsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'No budgets set for this month',
+                    'Chưa có ngân sách cho tháng này',
                     style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Tap the + button to set your first budget',
+                    'Nhấn nút + để thiết lập ngân sách đầu tiên',
                     style: TextStyle(color: Colors.grey),
                   ),
                 ],
@@ -108,7 +108,7 @@ class BudgetsScreen extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                'Remaining: ₹${NumberFormat('#,##,###').format(remaining)}',
+                                'Còn lại: ₹${NumberFormat('#,##,###').format(remaining)}',
                                 style: TextStyle(
                                   color: isOverBudget
                                       ? Colors.red
@@ -135,14 +135,14 @@ class BudgetsScreen extends ConsumerWidget {
                             showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
-                                title: const Text('Delete Budget'),
+                                title: const Text('Xóa ngân sách'),
                                 content: const Text(
-                                  'Are you sure you want to delete this budget?',
+                                  'Bạn có chắc chắn muốn xóa ngân sách này không?',
                                 ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(context),
-                                    child: const Text('Cancel'),
+                                    child: const Text('Hủy'),
                                   ),
                                   TextButton(
                                     onPressed: () {
@@ -152,7 +152,7 @@ class BudgetsScreen extends ConsumerWidget {
                                       Navigator.pop(context);
                                     },
                                     child: const Text(
-                                      'Delete',
+                                      'Xóa',
                                       style: TextStyle(color: Colors.red),
                                     ),
                                   ),
@@ -169,7 +169,7 @@ class BudgetsScreen extends ConsumerWidget {
                 error: (error, stack) => Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text('Error loading status: $error'),
+                    child: Text('Lỗi khi tải trạng thái: $error'),
                   ),
                 ),
               );
@@ -178,7 +178,7 @@ class BudgetsScreen extends ConsumerWidget {
             error: (error, stack) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Error loading spending: $error'),
+                child: Text('Lỗi khi tải chi tiêu: $error'),
               ),
             ),
           );
@@ -187,7 +187,7 @@ class BudgetsScreen extends ConsumerWidget {
         error: (error, stack) => Center(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Text('Error: $error'),
+            child: Text('Lỗi: $error'),
           ),
         ),
       ),
@@ -202,7 +202,7 @@ class BudgetsScreen extends ConsumerWidget {
           );
         },
         icon: const Icon(Icons.add),
-        label: const Text('Add Budget'),
+        label: const Text('Thêm ngân sách'),
       ),
     );
   }
