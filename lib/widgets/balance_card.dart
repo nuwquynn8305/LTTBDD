@@ -49,21 +49,25 @@ class BalanceCard extends ConsumerWidget {
                         color: Colors.green,
                         icon: Icons.arrow_downward,
                       ),
-                      loading: () => const CircularProgressIndicator(),
+                      loading: () => const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                       error: (_, __) => const Text('Error'),
                     ),
-                    incomeAsync.when(
-                      data: (income) => expensesAsync.when(
-                        data: (expenses) => _StatItem(
-                          label: 'Expenses',
-                          amount: expenses,
-                          color: Colors.red,
-                          icon: Icons.arrow_upward,
-                        ),
-                        loading: () => const CircularProgressIndicator(),
-                        error: (_, __) => const Text('Error'),
+                    expensesAsync.when(
+                      data: (expenses) => _StatItem(
+                        label: 'Expenses',
+                        amount: expenses,
+                        color: Colors.red,
+                        icon: Icons.arrow_upward,
                       ),
-                      loading: () => const CircularProgressIndicator(),
+                      loading: () => const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                       error: (_, __) => const Text('Error'),
                     ),
                   ],

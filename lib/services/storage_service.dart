@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/transaction.dart';
 import '../models/budget.dart';
@@ -47,8 +48,9 @@ class StorageService {
 
       _isInitialized = true;
     } catch (e) {
-      // Silently handle errors - boxes might already be open
-      _isInitialized = true;
+      // Don't mark as initialized if init actually failed
+      debugPrint('StorageService init error: $e');
+      rethrow;
     } finally {
       _isInitializing = false;
     }

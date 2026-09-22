@@ -47,16 +47,22 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    DashboardScreen(),
-    TransactionsScreen(),
-    BudgetsScreen(),
-  ];
+  void _switchToTransactions() {
+    setState(() {
+      _currentIndex = 1;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      DashboardScreen(onViewAllTransactions: _switchToTransactions),
+      const TransactionsScreen(),
+      const BudgetsScreen(),
+    ];
+
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: screens[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {

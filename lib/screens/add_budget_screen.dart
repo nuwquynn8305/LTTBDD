@@ -41,9 +41,6 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   }
 
   Future<void> _selectMonthYear() async {
-    final now = DateTime.now();
-    final nowCopy = now; // Use the variable to avoid lint warning
-
     // First show month picker
     final selectedMonth = await showDialog<int>(
       context: context,
@@ -126,8 +123,6 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         ],
       ),
     );
-
-    final _ = nowCopy; // Suppress unused variable warning
 
     if (selectedYear != null) {
       setState(() {

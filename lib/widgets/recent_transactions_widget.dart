@@ -6,7 +6,9 @@ import '../providers/transaction_provider.dart';
 import '../utils/categories.dart';
 
 class RecentTransactionsWidget extends ConsumerWidget {
-  const RecentTransactionsWidget({super.key});
+  final VoidCallback? onViewAll;
+
+  const RecentTransactionsWidget({super.key, this.onViewAll});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,9 +44,7 @@ class RecentTransactionsWidget extends ConsumerWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   TextButton(
-                    onPressed: () {
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) => TransactionsScreen()));
-                    },
+                    onPressed: onViewAll,
                     child: const Text('View All'),
                   ),
                 ],

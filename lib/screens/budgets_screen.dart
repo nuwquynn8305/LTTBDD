@@ -17,10 +17,20 @@ class BudgetsScreen extends ConsumerWidget {
     final budgetStatusAsync = ref.watch(budgetStatusProvider(now));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Budgets - ${DateFormat('MMMM yyyy').format(now)}'),
-      ),
-      body: budgetsAsync.when(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              'Budgets - ${DateFormat('MMMM yyyy').format(now)}',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: budgetsAsync.when(
         data: (budgets) {
           if (budgets.isEmpty) {
             return Center(
@@ -180,6 +190,9 @@ class BudgetsScreen extends ConsumerWidget {
             child: Text('Error: $error'),
           ),
         ),
+      ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

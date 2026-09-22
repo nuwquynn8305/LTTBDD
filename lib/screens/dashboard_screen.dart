@@ -3,21 +3,23 @@ import '../widgets/balance_card.dart';
 import '../widgets/recent_transactions_widget.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+  final VoidCallback? onViewAllTransactions;
+
+  const DashboardScreen({super.key, this.onViewAllTransactions});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BalanceCard(),
-              SizedBox(height: 16),
-              SizedBox(height: 16),
-              RecentTransactionsWidget(),
-              SizedBox(height: 80),
+              const BalanceCard(),
+              const SizedBox(height: 16),
+              RecentTransactionsWidget(
+                onViewAll: onViewAllTransactions,
+              ),
             ],
           ),
         ),
