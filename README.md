@@ -1,224 +1,151 @@
 # Expense Tracker App
 
-A smart personal finance and expense tracker app built with Flutter. This app helps users track their income and expenses, set budgets, and visualize their spending patterns.
+A smart personal finance and expense tracker app built with Flutter. The app helps users manage income and expenses across multiple wallets, set budgets, transfer funds, and visualize spending habits.
 
 ## Features
 
-### Core Features ✅
+### Core Features
+- **Dashboard**: Overview of total balance, income, expenses, and expense breakdown by category with interactive charts.
+- **Multi-Wallets & Accounts**: Manage multiple money sources (Cash, Bank Account, Credit Card, Savings, or Custom Wallets) with real-time balance calculations.
+- **Inter-Wallet Transfers**: Transfer money directly between wallets with instant balance updates on both sides.
+- **Transactions Management**:
+  - Add, edit, and delete income/expense/transfer transactions.
+  - Filter transactions by category or by specific wallet.
+  - Swipe-to-delete with confirmation.
+- **Budgets & Alerts**:
+  - Set monthly category spending limits.
+  - Visual progress indicators with over-budget alerts.
+- **Multi-Currency**: Support for VNĐ (`₫`), USD (`$`), EUR (`€`), JPY (`¥`), and GBP (`£`) with automatic formatting.
+- **Bilingual Localization**: Switch between Tiếng Việt (🇻🇳) and English (🇬🇧) instantly on the top bar.
+- **Dark Mode**: Support for Light, Dark, and System theme modes.
+- **Offline Storage**: Powered by Hive NoSQL for fast, local-first data storage.
 
-- **Dashboard**
-  - Current balance display (Income - Expenses)
-  - Recent transactions (last 10)
-  - Interactive expense charts by category
-  - Real-time financial summaries
-
-- **Transactions**
-  - Add, edit, and delete transactions
-  - Support for income and expense types
-  - Multiple categories (Food, Travel, Bills, etc.)
-  - Swipe-to-delete functionality with undo confirmation
-  - Detailed transaction notes
-  - Input validation and error handling
-
-- **Budgets**
-  - Set monthly budgets per category
-  - Visual progress indicators
-  - Over-budget alerts and warnings
-  - Real-time budget tracking
-  - Monthly budget management
-
-### Bonus Features ⭐
-
-- **Dark Mode**: Toggle between light and dark themes
-- **Smooth Animations**: Fluid transitions and interactions
-- **Swipe Gestures**: Swipe-to-delete with confirmation dialogs
-- **Category Icons**: Visual category representations
-- **Responsive UI**: Modern Material Design 3 interface
-
-## Screenshots
-
-![Dashboard](screenshots/dashboard.png)
-![Transactions](screenshots/transactions.png)
-![Budgets](screenshots/budgets.png)
+---
 
 ## Getting Started
 
 ### Prerequisites
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (3.x or higher)
+- [Dart SDK](https://dart.dev) (3.x or higher)
+- Editor: **VS Code** (with Flutter extension) or **Android Studio**
+- Target platform: Google Chrome / Edge, Android Device / Emulator, or Windows Desktop
 
-- Flutter 3.x or higher
-- Dart 3.9 or higher
-- Android Studio / Xcode (for mobile development)
-- VS Code / Android Studio (for development)
+---
 
 ### Installation
 
-1. **Clone the repository**
+1. Clone this repository:
    ```bash
    git clone <repository-url>
-   cd expense_tracker
+   cd Expense-Tracker
    ```
 
-2. **Install dependencies**
+2. Install dependencies:
    ```bash
    flutter pub get
    ```
 
-3. **Run the app**
-   ```bash
-   flutter run
-   ```
+---
 
-### Build for Production
+### Running the Project
 
-**Android:**
-```bash
-flutter build apk --release
-```
+#### 1. Running from VS Code / Android Studio
+- **VS Code**: Press `F5` or go to `Run` -> `Start Debugging`. Select your target device (Chrome or Android emulator) from the bottom right status bar.
+- **Android Studio**: Select your target device in the top dropdown toolbar and click the green **Run** (▶) button.
 
-**iOS:**
-```bash
-flutter build ios --release
-```
+#### 2. Running from Terminal / Command Prompt
 
-**Web:**
-```bash
-flutter build web --release
-```
+- **Web (Google Chrome - Recommended for quick testing)**:
+  ```bash
+  flutter run -d chrome --web-port=8080 --web-browser-flag="--user-data-dir=.chrome_data"
+  ```
+  *(The `--user-data-dir` flag ensures local data is kept persistently across browser restarts).*
 
-## Architecture
+- **Android (Physical phone connected via USB)**:
+  1. Enable **Developer Options** and **USB Debugging** on your Android phone.
+  2. Plug the USB cable into your computer.
+  3. Run:
+     ```bash
+     flutter run
+     ```
 
-### Tech Stack
+- **Android (Emulator)**:
+  ```bash
+  # Check available emulators
+  flutter emulators
 
-- **Flutter**: Cross-platform mobile framework
-- **Riverpod**: State management solution
-- **Hive**: Fast, lightweight local NoSQL database
-- **fl_chart**: Beautiful charts and data visualization
-- **Material Design 3**: Modern UI components
+  # Launch emulator and run
+  flutter emulators --launch Pixel_7
+  flutter run -d android
+  ```
+
+- **Windows Desktop**:
+  ```bash
+  flutter run -d windows
+  ```
+
+---
+
+## Build for Production
+
+- **Android (APK file)**:
+  ```bash
+  flutter build apk --release
+  ```
+  *Output file: `build/app/outputs/flutter-apk/app-release.apk`*
+
+- **Android (App Bundle for Google Play Store)**:
+  ```bash
+  flutter build appbundle --release
+  ```
+
+- **Web**:
+  ```bash
+  flutter build web --release
+  ```
+  *Output files are generated in `build/web/`.*
+
+---
+
+## Architecture & Tech Stack
+
+- **Framework**: Flutter (Dart)
+- **State Management**: Riverpod (`flutter_riverpod`)
+- **Local Storage**: Hive (`hive_flutter`) - Type-safe NoSQL storage
+- **Charts**: `fl_chart`
+- **Formatting**: `intl`, `flutter_localizations`
 
 ### Project Structure
 
 ```
 lib/
-├── main.dart                 # App entry point
-├── models/                   # Data models
-│   ├── transaction.dart     # Transaction model
-│   ├── budget.dart          # Budget model
-│   └── categories.dart      # Category utilities
-├── services/                # Business logic & data layer
-│   └── storage_service.dart # Hive storage service
-├── providers/               # Riverpod providers
-│   ├── transaction_provider.dart
-│   ├── budget_provider.dart
-│   └── theme_provider.dart
-├── screens/                 # UI screens
-│   ├── dashboard_screen.dart
-│   ├── transactions_screen.dart
-│   ├── budgets_screen.dart
-│   ├── add_transaction_screen.dart
-│   └── add_budget_screen.dart
-└── widgets/                 # Reusable widgets
-    ├── balance_card.dart
-    ├── recent_transactions_widget.dart
-    └── expense_chart.dart
+├── main.dart                 # App entry point & bottom navigation
+├── l10n/                     # Language strings (Vietnamese & English)
+├── models/                   # Data models (Transaction, Budget, Wallet, Currency)
+├── providers/                # Riverpod state providers
+├── screens/                  # Application screens (Dashboard, Transactions, Budgets, Wallets, Transfers)
+├── services/                 # Local storage service with Hive
+├── theme/                    # App color schemes and themes
+├── utils/                    # Category configs and helper utilities
+└── widgets/                  # Reusable UI components
 ```
 
-### State Management
-
-This app uses **Riverpod** for state management, providing:
-
-- **Type-safe state**: Compile-time safety for state management
-- **Auto-disposal**: Automatic resource cleanup
-- **Dependency injection**: Easy testing and modularity
-- **Reactive updates**: Automatic UI updates on state changes
-
-#### Key Providers:
-
-- `transactionsProvider`: Stream of all transactions
-- `recentTransactionsProvider`: Last 10 transactions
-- `budgetsProvider`: All budgets
-- `balanceProvider`: Current balance calculation
-- `themeNotifierProvider`: Theme mode management
-
-### Data Layer
-
-**Hive Database** is used for local storage:
-
-- **Type-safe storage**: Type adapters for models
-- **Fast performance**: NoSQL key-value database
-- **Offline-first**: All data stored locally
-- **CRUD operations**: Full transaction management
-
-### UI/UX Design
-
-- **Material Design 3**: Modern, adaptive design system
-- **Responsive layouts**: Works on all screen sizes
-- **Accessibility**: Screen reader support
-- **Color theming**: Custom color schemes
-- **Smooth animations**: Delightful user experience
+---
 
 ## Testing
 
-### Running Tests
+Run the test suite:
 
 ```bash
-# Run all tests
+# Run all unit and widget tests
 flutter test
 
-# Run with coverage
+# Run with test coverage
 flutter test --coverage
-
-# Watch mode
-flutter test --watch
 ```
 
-### Test Coverage
-
-- **Unit Tests**: Models, services, and utilities
-- **Widget Tests**: UI components and interactions
-- **Integration Tests**: End-to-end user flows
-
-Test files are located in the `test/` directory:
-- `test/models/`: Transaction and Budget model tests
-- `test/services/`: Storage service tests
-- `test/widgets/`: Widget component tests
-
-## Git Commits
-
-The project follows conventional commits with meaningful messages:
-
-1. `feat: add project structure and dependencies`
-2. `feat: implement data models with Hive adapters`
-3. `feat: create storage service with CRUD operations`
-4. `feat: implement Riverpod providers for state management`
-5. `feat: build dashboard with balance and charts`
-6. `feat: add transactions screen with swipe-to-delete`
-7. `feat: implement budgets screen with progress tracking`
-8. `feat: add dark mode and theme switching`
-9. `test: add unit and widget tests`
-10. `docs: update README with architecture details`
-
-## Future Enhancements
-
-- [ ] Export transactions to CSV
-- [ ] Data backup and restore
-- [ ] Multiple currency support
-- [ ] Recurring transactions
-- [ ] Analytics dashboard with trends
-- [ ] Cloud sync
-- [ ] Multi-user support
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new features
-5. Submit a pull request
+---
 
 ## License
 
 This project is licensed under the MIT License.
-
-## Contact
-
-For questions or feedback, please open an issue or contact the project maintainer.
