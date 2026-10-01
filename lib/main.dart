@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'l10n/app_strings.dart';
+import 'providers/locale_provider.dart';
+import 'providers/theme_provider.dart';
+import 'screens/budgets_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/transactions_screen.dart';
-import 'screens/budgets_screen.dart';
-import 'providers/theme_provider.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -16,6 +18,7 @@ void main() async {
 
 Future<void> _initApp() async {
   await initializeDateFormatting('vi_VN');
+  await initializeDateFormatting('en_US');
   final storageService = StorageService();
   await storageService.init();
 }
@@ -26,15 +29,17 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeNotifierProvider);
+    final locale = ref.watch(localeNotifierProvider);
     final lightTheme = ref.read(lightThemeProvider);
     final darkTheme = ref.read(darkThemeProvider);
+    final strings = AppStrings.fromLocale(locale);
 
     return MaterialApp(
-      title: 'Quản lý chi tiêu',
+      title: strings.appTitle,
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeMode,
-      locale: const Locale('vi', 'VN'),
+      locale: locale,
       supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -47,14 +52,14 @@ class MyApp extends ConsumerWidget {
   }
 }
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
 
   void _switchToTransactions() {
@@ -65,6 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeNotifierProvider);
+    final strings = AppStrings.fromLocale(locale);
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -81,21 +89,21 @@ class _HomeScreenState extends State<HomeScreen> {
             _currentIndex = index;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Tổng quan',
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: const Icon(Icons.dashboard),
+            label: strings.navDashboard,
           ),
           NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
-            label: 'Giao dịch',
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long),
+            label: strings.navTransactions,
           ),
           NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet),
-            label: 'Ngân sách',
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            selectedIcon: const Icon(Icons.account_balance_wallet),
+            label: strings.navBudgets,
           ),
         ],
       ),

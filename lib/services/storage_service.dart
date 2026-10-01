@@ -6,6 +6,7 @@ import '../models/budget.dart';
 class StorageService {
   static const String transactionBoxName = 'transactions';
   static const String budgetBoxName = 'budgets';
+  static const String settingsBoxName = 'settings';
 
   static final StorageService _instance = StorageService._internal();
   static bool _isInitialized = false;
@@ -46,6 +47,10 @@ class StorageService {
         await Hive.openBox<Budget>(budgetBoxName);
       }
 
+      if (!Hive.isBoxOpen(settingsBoxName)) {
+        await Hive.openBox(settingsBoxName);
+      }
+
       _isInitialized = true;
     } catch (e) {
       // Don't mark as initialized if init actually failed
@@ -54,6 +59,43 @@ class StorageService {
     } finally {
       _isInitializing = false;
     }
+  }
+
+  // Settings methods
+  String getCurrencyCode() {
+    if (!Hive.isBoxOpen(settingsBoxName)) return 'VND';
+    final box = Hive.box(settingsBoxName);
+    return box.get('currency', defaultValue: 'VND') as String;
+  }
+
+  Future<void> setCurrencyCode(String code) async {
+    await init();
+    final box = Hive.box(settingsBoxName);
+    await box.put('currency', code);
+  }
+
+  String getLanguageCode() {
+    if (!Hive.isBoxOpen(settingsBoxName)) return 'vi';
+    final box = Hive.box(settingsBoxName);
+    return box.get('language', defaultValue: 'vi') as String;
+  }
+
+  Future<void> setLanguageCode(String code) async {
+    await init();
+    final box = Hive.box(settingsBoxName);
+    await box.put('language', code);
+  }
+
+  String getThemeMode() {
+    if (!Hive.isBoxOpen(settingsBoxName)) return 'system';
+    final box = Hive.box(settingsBoxName);
+    return box.get('theme', defaultValue: 'system') as String;
+  }
+
+  Future<void> setThemeMode(String mode) async {
+    await init();
+    final box = Hive.box(settingsBoxName);
+    await box.put('theme', mode);
   }
 
   // Transaction methods

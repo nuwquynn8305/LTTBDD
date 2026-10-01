@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../l10n/app_strings.dart';
+import '../providers/locale_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../utils/categories.dart';
 
@@ -12,6 +14,8 @@ class ExpenseChart extends ConsumerWidget {
     final now = DateTime.now();
     final currentMonth = DateTime(now.year, now.month);
     final expenseAsync = ref.watch(expenseByCategoryProvider(currentMonth));
+    final locale = ref.watch(localeNotifierProvider);
+    final strings = AppStrings.fromLocale(locale);
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -22,7 +26,7 @@ class ExpenseChart extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Chi tiêu theo danh mục', style: textTheme.titleMedium),
+            Text(strings.expenseByCategory, style: textTheme.titleMedium),
             const SizedBox(height: 16),
             SizedBox(
               height: 220,
@@ -32,7 +36,7 @@ class ExpenseChart extends ConsumerWidget {
                       spending.values.every((v) => v == 0)) {
                     return Center(
                       child: Text(
-                        'Chưa có dữ liệu chi tiêu tháng này',
+                        strings.noExpenseDataThisMonth,
                         style: textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -81,6 +85,11 @@ class ExpenseChart extends ConsumerWidget {
                           itemBuilder: (context, index) {
                             final item = validCategories[index];
                             final color = Categories.getMaterialColor(item.key);
+                            final localizedCategory =
+                                Categories.getLocalizedName(
+                                  item.key,
+                                  locale.languageCode,
+                                );
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Row(
@@ -96,7 +105,7 @@ class ExpenseChart extends ConsumerWidget {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      item.key,
+                                      localizedCategory,
                                       style: textTheme.bodySmall,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -112,7 +121,7 @@ class ExpenseChart extends ConsumerWidget {
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) =>
-                    const Center(child: Text('Lỗi khi tải biểu đồ')),
+                    Center(child: Text(strings.errorLoading('$error'))),
               ),
             ),
           ],

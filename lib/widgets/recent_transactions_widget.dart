@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_strings.dart';
 import '../models/transaction.dart';
+import '../providers/currency_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../utils/categories.dart';
 
@@ -13,6 +16,8 @@ class RecentTransactionsWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recentTransactionsAsync = ref.watch(recentTransactionsProvider);
+    final locale = ref.watch(localeNotifierProvider);
+    final strings = AppStrings.fromLocale(locale);
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -25,7 +30,7 @@ class RecentTransactionsWidget extends ConsumerWidget {
               padding: const EdgeInsets.all(24),
               child: Center(
                 child: Text(
-                  'Chưa có giao dịch nào',
+                  strings.noRecentTransactions,
                   style: textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -44,13 +49,13 @@ class RecentTransactionsWidget extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Giao dịch gần đây',
+                      strings.recentTransactions,
                       style: textTheme.titleMedium,
                     ),
                   ),
                   TextButton(
                     onPressed: onViewAll,
-                    child: const Text('Xem tất cả'),
+                    child: Text(strings.viewAll),
                   ),
                 ],
               ),
@@ -73,7 +78,7 @@ class RecentTransactionsWidget extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (error, stack) =>
-          const Center(child: Text('Lỗi khi tải giao dịch')),
+          Center(child: Text(strings.errorLoading('$error'))),
     );
   }
 }
@@ -86,14 +91,18 @@ class TransactionTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final currency = ref.watch(currencyNotifierProvider);
+    final locale = ref.watch(localeNotifierProvider);
+    final strings = AppStrings.fromLocale(locale);
     final isIncome = transaction.type == 'income';
     final amountColor = isIncome ? colorScheme.tertiary : colorScheme.error;
     final categoryColor = Categories.getMaterialColor(transaction.category);
-    final currency = NumberFormat.currency(
-      locale: 'vi_VN',
-      symbol: '₫',
-      decimalDigits: 0,
-    );
+    final localizedCategory =
+        Categories.getLocalizedName(transaction.category, locale.languageCode);
+
+    final dateFormat = locale.languageCode == 'vi'
+        ? DateFormat('dd/MM/yyyy', 'vi_VN')
+        : DateFormat('MMM dd, yyyy', 'en_US');
 
     return Dismissible(
       key: Key(transaction.id),
@@ -112,18 +121,16 @@ class TransactionTile extends ConsumerWidget {
           context: context,
           builder: (context) => AlertDialog(
             icon: const Icon(Icons.delete_outline),
-            title: const Text('Xóa giao dịch?'),
-            content: const Text(
-              'Giao dịch này sẽ bị xóa khỏi thiết bị của bạn.',
-            ),
+            title: Text(strings.deleteTransactionConfirmTitle),
+            content: Text(strings.deleteTransactionConfirmMsg),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Hủy'),
+                child: Text(strings.cancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Xóa'),
+                child: Text(strings.delete),
               ),
             ],
           ),
@@ -144,10 +151,10 @@ class TransactionTile extends ConsumerWidget {
           ),
           title: Text(transaction.title),
           subtitle: Text(
-            DateFormat('dd/MM/yyyy', 'vi_VN').format(transaction.date),
+            '${dateFormat.format(transaction.date)} • $localizedCategory',
           ),
           trailing: Text(
-            '${isIncome ? '+' : '-'}${currency.format(transaction.amount)}',
+            currency.formatWithSign(transaction.amount, isIncome: isIncome),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: amountColor,

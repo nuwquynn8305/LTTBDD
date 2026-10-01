@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import '../l10n/app_strings.dart';
+import '../providers/currency_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/transaction_provider.dart';
 
 class BalanceCard extends ConsumerWidget {
@@ -9,13 +11,11 @@ class BalanceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final balanceAsync = ref.watch(balanceProvider);
+    final currency = ref.watch(currencyNotifierProvider);
+    final locale = ref.watch(localeNotifierProvider);
+    final strings = AppStrings.fromLocale(locale);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final currency = NumberFormat.currency(
-      locale: 'vi_VN',
-      symbol: '₫',
-      decimalDigits: 0,
-    );
 
     return balanceAsync.when(
       data: (balance) {
@@ -31,7 +31,7 @@ class BalanceCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Số dư hiện tại',
+                  strings.currentBalance,
                   style: textTheme.labelLarge?.copyWith(
                     color: colorScheme.onPrimaryContainer,
                   ),
@@ -50,26 +50,26 @@ class BalanceCard extends ConsumerWidget {
                     Expanded(
                       child: incomeAsync.when(
                         data: (income) => _StatItem(
-                          label: 'Thu nhập',
+                          label: strings.totalIncome,
                           amount: income,
                           icon: Icons.north_east,
                           color: colorScheme.tertiary,
                         ),
                         loading: () => const LinearProgressIndicator(),
-                        error: (_, __) => const Text('Lỗi'),
+                        error: (_, __) => Text(strings.errorGeneric),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: expensesAsync.when(
                         data: (expenses) => _StatItem(
-                          label: 'Chi tiêu',
+                          label: strings.totalExpenses,
                           amount: expenses,
                           icon: Icons.south_west,
                           color: colorScheme.error,
                         ),
                         loading: () => const LinearProgressIndicator(),
-                        error: (_, __) => const Text('Lỗi'),
+                        error: (_, __) => Text(strings.errorGeneric),
                       ),
                     ),
                   ],
@@ -90,14 +90,14 @@ class BalanceCard extends ConsumerWidget {
         margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: Text('Lỗi: $error'),
+          child: Text(strings.errorLoading('$error')),
         ),
       ),
     );
   }
 }
 
-class _StatItem extends StatelessWidget {
+class _StatItem extends ConsumerWidget {
   final String label;
   final double amount;
   final Color color;
@@ -111,14 +111,10 @@ class _StatItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final currency = NumberFormat.currency(
-      locale: 'vi_VN',
-      symbol: '₫',
-      decimalDigits: 0,
-    );
+    final currency = ref.watch(currencyNotifierProvider);
 
     return Container(
       padding: const EdgeInsets.all(12),

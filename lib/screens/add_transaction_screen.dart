@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_strings.dart';
 import '../models/transaction.dart';
+import '../providers/currency_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../utils/categories.dart';
 
@@ -31,7 +34,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (widget.transaction != null) {
       final t = widget.transaction!;
       _titleController.text = t.title;
-      _amountController.text = t.amount.toStringAsFixed(0);
+      _amountController.text = t.amount % 1 == 0
+          ? t.amount.toInt().toString()
+          : t.amount.toString();
       _notesController.text = t.notes ?? '';
       _selectedType = t.type;
       _selectedCategory = t.category;
@@ -72,7 +77,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           DateTime.now().millisecondsSinceEpoch.toString(),
       title: _titleController.text,
       amount: double.parse(
-        _amountController.text.replaceAll('.', '').replaceAll(',', ''),
+        _amountController.text.replaceAll(' ', '').replaceAll(',', '.'),
       ),
       category: _selectedCategory,
       date: _selectedDate,
@@ -98,10 +103,17 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.transaction != null;
+    final locale = ref.watch(localeNotifierProvider);
+    final currency = ref.watch(currencyNotifierProvider);
+    final strings = AppStrings.fromLocale(locale);
+
+    final dateFormat = locale.languageCode == 'vi'
+        ? DateFormat('EEEE, dd/MM/yyyy', 'vi_VN')
+        : DateFormat('EEEE, MMM dd, yyyy', 'en_US');
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Sửa giao dịch' : 'Thêm giao dịch'),
+        title: Text(isEditing ? strings.editTransaction : strings.addTransaction),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -111,16 +123,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SegmentedButton<String>(
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: 'expense',
-                    label: Text('Khoản chi'),
-                    icon: Icon(Icons.south_west),
+                    label: Text(strings.tabExpenses),
+                    icon: const Icon(Icons.south_west),
                   ),
                   ButtonSegment(
                     value: 'income',
-                    label: Text('Khoản thu'),
-                    icon: Icon(Icons.north_east),
+                    label: Text(strings.tabIncome),
+                    icon: const Icon(Icons.north_east),
                   ),
                 ],
                 selected: {_selectedType},
@@ -137,13 +149,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               TextFormField(
                 controller: _titleController,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Tiêu đề',
-                  prefixIcon: Icon(Icons.title),
+                decoration: InputDecoration(
+                  labelText: strings.titleLabel,
+                  prefixIcon: const Icon(Icons.title),
                 ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vui lòng nhập tiêu đề';
+                  if (value == null || value.trim().isEmpty) {
+                    return strings.titleRequired;
                   }
                   return null;
                 },
@@ -151,22 +163,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _amountController,
-                decoration: const InputDecoration(
-                  labelText: 'Số tiền',
-                  prefixIcon: Icon(Icons.payments_outlined),
-                  suffixText: '₫',
+                decoration: InputDecoration(
+                  labelText: strings.amountLabel,
+                  prefixIcon: const Icon(Icons.payments_outlined),
+                  suffixText: currency.symbol,
                 ),
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vui lòng nhập số tiền';
+                  if (value == null || value.trim().isEmpty) {
+                    return strings.amountRequired;
                   }
-                  final cleanValue = value
-                      .replaceAll('.', '')
-                      .replaceAll(',', '');
-                  if (double.tryParse(cleanValue) == null ||
-                      double.parse(cleanValue) <= 0) {
-                    return 'Vui lòng nhập số tiền hợp lệ';
+                  final cleanValue =
+                      value.replaceAll(' ', '').replaceAll(',', '.');
+                  final parsed = double.tryParse(cleanValue);
+                  if (parsed == null || parsed <= 0) {
+                    return strings.amountInvalid;
                   }
                   return null;
                 },
@@ -175,22 +186,26 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               DropdownButtonFormField<String>(
                 key: ValueKey('$_selectedType-$_selectedCategory'),
                 initialValue: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: 'Danh mục',
-                  prefixIcon: Icon(Icons.category_outlined),
+                decoration: InputDecoration(
+                  labelText: strings.categoryLabel,
+                  prefixIcon: const Icon(Icons.category_outlined),
                 ),
                 items:
                     (_selectedType == 'expense'
                             ? Categories.expenseCategories
                             : Categories.incomeCategories)
                         .map((category) {
+                          final localizedCategory = Categories.getLocalizedName(
+                            category,
+                            locale.languageCode,
+                          );
                           return DropdownMenuItem(
                             value: category,
                             child: Row(
                               children: [
                                 Icon(Categories.getMaterialIcon(category)),
                                 const SizedBox(width: 12),
-                                Text(category),
+                                Text(localizedCategory),
                               ],
                             ),
                           );
@@ -206,21 +221,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               InkWell(
                 onTap: _selectDate,
                 child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Ngày',
-                    prefixIcon: Icon(Icons.calendar_today_outlined),
+                  decoration: InputDecoration(
+                    labelText: strings.dateLabel,
+                    prefixIcon: const Icon(Icons.calendar_today_outlined),
                   ),
                   child: Text(
-                    DateFormat('EEEE, dd/MM/yyyy', 'vi_VN').format(_selectedDate),
+                    dateFormat.format(_selectedDate),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _notesController,
-                decoration: const InputDecoration(
-                  labelText: 'Ghi chú (tùy chọn)',
-                  prefixIcon: Icon(Icons.notes_outlined),
+                decoration: InputDecoration(
+                  labelText: strings.notesLabel,
+                  prefixIcon: const Icon(Icons.notes_outlined),
                   alignLabelWithHint: true,
                 ),
                 maxLines: 3,
@@ -229,7 +244,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               FilledButton.icon(
                 onPressed: _saveTransaction,
                 icon: const Icon(Icons.check),
-                label: Text(isEditing ? 'Lưu thay đổi' : 'Thêm giao dịch'),
+                label: Text(isEditing ? strings.saveChanges : strings.addTransaction),
               ),
             ],
           ),

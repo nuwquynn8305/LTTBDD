@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_strings.dart';
 
 class Categories {
   static const List<String> expenseCategories = [
@@ -92,5 +93,10 @@ class Categories {
 
   static List<int> getColor(String category) {
     return categoryColors[category] ?? [0xFF, 0x9E, 0x9E, 0x9E];
+  }
+
+  static String getLocalizedName(String category, String languageCode) {
+    final strings = AppStrings(languageCode);
+    return strings.getCategoryTitle(category);
   }
 }

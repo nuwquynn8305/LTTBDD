@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../l10n/app_strings.dart';
 import '../models/budget.dart';
 import '../providers/budget_provider.dart';
+import '../providers/currency_provider.dart';
+import '../providers/locale_provider.dart';
 import '../utils/categories.dart';
 
 class AddBudgetScreen extends ConsumerStatefulWidget {
@@ -26,7 +29,9 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     super.initState();
     if (widget.budget != null) {
       final b = widget.budget!;
-      _amountController.text = b.limit.toStringAsFixed(0);
+      _amountController.text = b.limit % 1 == 0
+          ? b.limit.toInt().toString()
+          : b.limit.toString();
       _selectedCategory = b.category;
       _selectedMonth = b.month;
       _selectedYear = b.year;
@@ -39,12 +44,12 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     super.dispose();
   }
 
-  Future<void> _selectMonthYear() async {
+  Future<void> _selectMonthYear(AppStrings strings) async {
     final colorScheme = Theme.of(context).colorScheme;
     final selectedMonth = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Chọn tháng'),
+        title: Text(strings.selectMonth),
         content: SizedBox(
           width: 300,
           height: 280,
@@ -62,7 +67,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                 padding: const EdgeInsets.all(4),
                 child: FilterChip(
                   selected: isSelected,
-                  label: Text('$month'),
+                  label: Text('${strings.monthPrefix} $month'),
                   onSelected: (_) => Navigator.pop(context, month),
                   selectedColor: colorScheme.secondaryContainer,
                 ),
@@ -73,7 +78,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
+            child: Text(strings.cancel),
           ),
         ],
       ),
@@ -84,7 +89,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final selectedYear = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Chọn năm'),
+        title: Text(strings.selectYear),
         content: SizedBox(
           width: 300,
           height: 300,
@@ -100,7 +105,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
+            child: Text(strings.cancel),
           ),
         ],
       ),
@@ -125,7 +130,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
           '${_selectedCategory}_${_selectedMonth}_$_selectedYear',
       category: _selectedCategory,
       limit: double.parse(
-        _amountController.text.replaceAll('.', '').replaceAll(',', ''),
+        _amountController.text.replaceAll(' ', '').replaceAll(',', '.'),
       ),
       month: _selectedMonth,
       year: _selectedYear,
@@ -145,10 +150,13 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.budget != null;
+    final locale = ref.watch(localeNotifierProvider);
+    final currency = ref.watch(currencyNotifierProvider);
+    final strings = AppStrings.fromLocale(locale);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Sửa ngân sách' : 'Thêm ngân sách'),
+        title: Text(isEditing ? strings.editBudget : strings.addBudget),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -159,18 +167,22 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
             children: [
               DropdownButtonFormField<String>(
                 initialValue: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: 'Danh mục',
-                  prefixIcon: Icon(Icons.category_outlined),
+                decoration: InputDecoration(
+                  labelText: strings.categoryLabel,
+                  prefixIcon: const Icon(Icons.category_outlined),
                 ),
                 items: Categories.expenseCategories.map((category) {
+                  final localizedCategory = Categories.getLocalizedName(
+                    category,
+                    locale.languageCode,
+                  );
                   return DropdownMenuItem(
                     value: category,
                     child: Row(
                       children: [
                         Icon(Categories.getMaterialIcon(category)),
                         const SizedBox(width: 12),
-                        Text(category),
+                        Text(localizedCategory),
                       ],
                     ),
                   );
@@ -184,42 +196,45 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _amountController,
-                decoration: const InputDecoration(
-                  labelText: 'Giới hạn ngân sách',
-                  prefixIcon: Icon(Icons.payments_outlined),
-                  suffixText: '₫',
+                decoration: InputDecoration(
+                  labelText: strings.budgetLimit,
+                  prefixIcon: const Icon(Icons.payments_outlined),
+                  suffixText: currency.symbol,
                 ),
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vui lòng nhập giới hạn ngân sách';
+                  if (value == null || value.trim().isEmpty) {
+                    return strings.budgetLimitRequired;
                   }
-                  final cleanValue = value
-                      .replaceAll('.', '')
-                      .replaceAll(',', '');
-                  if (double.tryParse(cleanValue) == null ||
-                      double.parse(cleanValue) <= 0) {
-                    return 'Vui lòng nhập số tiền hợp lệ';
+                  final cleanValue =
+                      value.replaceAll(' ', '').replaceAll(',', '.');
+                  final parsed = double.tryParse(cleanValue);
+                  if (parsed == null || parsed <= 0) {
+                    return strings.amountInvalid;
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               InkWell(
-                onTap: _selectMonthYear,
+                onTap: () => _selectMonthYear(strings),
                 child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Tháng & năm',
-                    prefixIcon: Icon(Icons.calendar_month_outlined),
+                  decoration: InputDecoration(
+                    labelText: strings.monthAndYear,
+                    prefixIcon: const Icon(Icons.calendar_month_outlined),
                   ),
-                  child: Text('Tháng $_selectedMonth/$_selectedYear'),
+                  child: Text(
+                    locale.languageCode == 'vi'
+                        ? 'Tháng $_selectedMonth/$_selectedYear'
+                        : 'Month $_selectedMonth/$_selectedYear',
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
               FilledButton.icon(
                 onPressed: _saveBudget,
                 icon: const Icon(Icons.check),
-                label: Text(isEditing ? 'Lưu thay đổi' : 'Thêm ngân sách'),
+                label: Text(isEditing ? strings.saveChanges : strings.addBudget),
               ),
             ],
           ),

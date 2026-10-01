@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_strings.dart';
 import '../models/budget.dart';
 import '../providers/budget_provider.dart';
+import '../providers/currency_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../utils/categories.dart';
 import '../widgets/empty_state.dart';
@@ -19,12 +22,19 @@ class BudgetsScreen extends ConsumerWidget {
     final budgetsAsync = ref.watch(budgetsByMonthProvider);
     final spendingAsync = ref.watch(expenseByCategoryProvider(currentMonth));
     final budgetStatusAsync = ref.watch(budgetStatusProvider(currentMonth));
+    final locale = ref.watch(localeNotifierProvider);
+    final currency = ref.watch(currencyNotifierProvider);
+    final strings = AppStrings.fromLocale(locale);
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
+    final monthFormat = locale.languageCode == 'vi'
+        ? DateFormat('MMMM yyyy', 'vi_VN')
+        : DateFormat('MMMM yyyy', 'en_US');
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ngân sách'),
+        title: Text(strings.navBudgets),
         actions: const [ThemeActionButton()],
       ),
       body: Column(
@@ -33,7 +43,7 @@ class BudgetsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: Text(
-              DateFormat('MMMM yyyy', 'vi_VN').format(now),
+              monthFormat.format(now),
               style: textTheme.titleMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -45,10 +55,9 @@ class BudgetsScreen extends ConsumerWidget {
                 if (budgets.isEmpty) {
                   return EmptyState(
                     icon: Icons.account_balance_wallet_outlined,
-                    title: 'Chưa có ngân sách',
-                    message:
-                        'Đặt hạn mức theo danh mục để theo dõi chi tiêu tháng này.',
-                    actionLabel: 'Thêm ngân sách',
+                    title: strings.noBudgets,
+                    message: strings.noBudgetsDesc,
+                    actionLabel: strings.addBudget,
                     onAction: () => _openEditor(context),
                   );
                 }
@@ -74,14 +83,14 @@ class BudgetsScreen extends ConsumerWidget {
                             final categoryColor = Categories.getMaterialColor(
                               budget.category,
                             );
+                            final localizedCategory =
+                                Categories.getLocalizedName(
+                                  budget.category,
+                                  locale.languageCode,
+                                );
                             final progressColor = isOverBudget
                                 ? colorScheme.error
                                 : colorScheme.primary;
-                            final currency = NumberFormat.currency(
-                              locale: 'vi_VN',
-                              symbol: '₫',
-                              decimalDigits: 0,
-                            );
 
                             return Card(
                               clipBehavior: Clip.antiAlias,
@@ -89,7 +98,7 @@ class BudgetsScreen extends ConsumerWidget {
                                 onTap: () =>
                                     _openEditor(context, budget: budget),
                                 onLongPress: () =>
-                                    _confirmDelete(context, ref, budget.id),
+                                    _confirmDelete(context, ref, budget.id, strings),
                                 child: Padding(
                                   padding: const EdgeInsets.all(16),
                                   child: Column(
@@ -111,12 +120,12 @@ class BudgetsScreen extends ConsumerWidget {
                                           const SizedBox(width: 12),
                                           Expanded(
                                             child: Text(
-                                              budget.category,
+                                              localizedCategory,
                                               style: textTheme.titleMedium,
                                             ),
                                           ),
                                           IconButton(
-                                            tooltip: 'Chỉnh sửa',
+                                            tooltip: strings.editTooltip,
                                             icon: const Icon(Icons.edit_outlined),
                                             onPressed: () => _openEditor(
                                               context,
@@ -149,8 +158,8 @@ class BudgetsScreen extends ConsumerWidget {
                                       const SizedBox(height: 4),
                                       Text(
                                         isOverBudget
-                                            ? 'Vượt ${currency.format(spent - budget.limit)}'
-                                            : 'Còn lại ${currency.format(remaining)}',
+                                            ? '${strings.overBudget} ${currency.format(spent - budget.limit)}'
+                                            : '${strings.remaining} ${currency.format(remaining)}',
                                         style: textTheme.bodySmall?.copyWith(
                                           color: isOverBudget
                                               ? colorScheme.error
@@ -170,7 +179,7 @@ class BudgetsScreen extends ConsumerWidget {
                       error: (error, stack) => Center(
                         child: Padding(
                           padding: const EdgeInsets.all(16),
-                          child: Text('Lỗi khi tải trạng thái: $error'),
+                          child: Text(strings.errorLoadingStatus('$error')),
                         ),
                       ),
                     );
@@ -180,7 +189,7 @@ class BudgetsScreen extends ConsumerWidget {
                   error: (error, stack) => Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
-                      child: Text('Lỗi khi tải chi tiêu: $error'),
+                      child: Text(strings.errorLoadingExpense('$error')),
                     ),
                   ),
                 );
@@ -189,7 +198,7 @@ class BudgetsScreen extends ConsumerWidget {
               error: (error, stack) => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text('Lỗi: $error'),
+                  child: Text(strings.errorLoading('$error')),
                 ),
               ),
             ),
@@ -199,7 +208,7 @@ class BudgetsScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openEditor(context),
         icon: const Icon(Icons.add),
-        label: const Text('Thêm ngân sách'),
+        label: Text(strings.addBudget),
       ),
     );
   }
@@ -215,23 +224,22 @@ class BudgetsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     String budgetId,
+    AppStrings strings,
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.delete_outline),
-        title: const Text('Xóa ngân sách?'),
-        content: const Text(
-          'Ngân sách này sẽ bị xóa khỏi tháng hiện tại.',
-        ),
+        title: Text(strings.deleteBudgetConfirmTitle),
+        content: Text(strings.deleteBudgetConfirmMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Hủy'),
+            child: Text(strings.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Xóa'),
+            child: Text(strings.delete),
           ),
         ],
       ),

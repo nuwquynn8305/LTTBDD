@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_strings.dart';
 import '../models/transaction.dart';
+import '../providers/currency_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/transaction_provider.dart';
 import '../utils/categories.dart';
 import '../widgets/empty_state.dart';
@@ -14,17 +17,19 @@ class TransactionsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactionsAsync = ref.watch(transactionsProvider);
+    final locale = ref.watch(localeNotifierProvider);
+    final strings = AppStrings.fromLocale(locale);
 
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Giao dịch'),
+          title: Text(strings.navTransactions),
           actions: const [ThemeActionButton()],
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Khoản chi', icon: Icon(Icons.south_west)),
-              Tab(text: 'Khoản thu', icon: Icon(Icons.north_east)),
+              Tab(text: strings.tabExpenses, icon: const Icon(Icons.south_west)),
+              Tab(text: strings.tabIncome, icon: const Icon(Icons.north_east)),
             ],
           ),
         ),
@@ -33,9 +38,9 @@ class TransactionsScreen extends ConsumerWidget {
             if (transactions.isEmpty) {
               return EmptyState(
                 icon: Icons.receipt_long_outlined,
-                title: 'Chưa có giao dịch',
-                message: 'Thêm giao dịch đầu tiên để bắt đầu theo dõi chi tiêu.',
-                actionLabel: 'Thêm giao dịch',
+                title: strings.noTransactions,
+                message: strings.noTransactionsDesc,
+                actionLabel: strings.addTransaction,
                 onAction: () => _openEditor(context),
               );
             }
@@ -56,12 +61,13 @@ class TransactionsScreen extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('Lỗi: $error')),
+          error: (error, stack) =>
+              Center(child: Text(strings.errorLoading('$error'))),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => _openEditor(context),
           icon: const Icon(Icons.add),
-          label: const Text('Thêm giao dịch'),
+          label: Text(strings.addTransaction),
         ),
       ),
     );
@@ -84,20 +90,23 @@ class _TransactionList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeNotifierProvider);
+    final strings = AppStrings.fromLocale(locale);
+
     if (transactions.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.filter_list_off_outlined,
-        title: 'Không có mục nào',
-        message: 'Chưa có giao dịch trong tab này.',
+        title: strings.noItemsInTab,
+        message: strings.noItemsInTabDesc,
       );
     }
 
     final colorScheme = Theme.of(context).colorScheme;
-    final currency = NumberFormat.currency(
-      locale: 'vi_VN',
-      symbol: '₫',
-      decimalDigits: 0,
-    );
+    final currency = ref.watch(currencyNotifierProvider);
+
+    final dateFormat = locale.languageCode == 'vi'
+        ? DateFormat('dd/MM/yyyy HH:mm', 'vi_VN')
+        : DateFormat('MMM dd, yyyy HH:mm', 'en_US');
 
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
@@ -110,6 +119,8 @@ class _TransactionList extends ConsumerWidget {
             ? colorScheme.tertiary
             : colorScheme.error;
         final categoryColor = Categories.getMaterialColor(transaction.category);
+        final localizedCategory =
+            Categories.getLocalizedName(transaction.category, locale.languageCode);
 
         return Dismissible(
           key: Key(transaction.id),
@@ -123,13 +134,13 @@ class _TransactionList extends ConsumerWidget {
             ),
             child: Icon(Icons.delete_outline, color: colorScheme.onErrorContainer),
           ),
-          confirmDismiss: (direction) => _confirmDelete(context),
+          confirmDismiss: (direction) => _confirmDelete(context, strings),
           onDismissed: (direction) {
             ref
                 .read(transactionNotifierProvider.notifier)
                 .deleteTransaction(transaction.id);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Đã xóa giao dịch')),
+              SnackBar(content: Text(strings.transactionDeleted)),
             );
           },
           child: Card(
@@ -149,11 +160,11 @@ class _TransactionList extends ConsumerWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               subtitle: Text(
-                '${DateFormat('dd/MM/yyyy HH:mm', 'vi_VN').format(transaction.date)}\n${transaction.category}',
+                '${dateFormat.format(transaction.date)}\n$localizedCategory',
               ),
               isThreeLine: true,
               trailing: Text(
-                '${isIncome ? '+' : '-'}${currency.format(transaction.amount)}',
+                currency.formatWithSign(transaction.amount, isIncome: isIncome),
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: amountColor,
@@ -175,23 +186,21 @@ class _TransactionList extends ConsumerWidget {
     );
   }
 
-  Future<bool> _confirmDelete(BuildContext context) async {
+  Future<bool> _confirmDelete(BuildContext context, AppStrings strings) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.delete_outline),
-        title: const Text('Xóa giao dịch?'),
-        content: const Text(
-          'Giao dịch này sẽ bị xóa khỏi thiết bị của bạn.',
-        ),
+        title: Text(strings.deleteTransactionConfirmTitle),
+        content: Text(strings.deleteTransactionConfirmMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Hủy'),
+            child: Text(strings.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Xóa'),
+            child: Text(strings.delete),
           ),
         ],
       ),
