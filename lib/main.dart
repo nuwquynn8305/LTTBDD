@@ -8,6 +8,7 @@ import 'providers/theme_provider.dart';
 import 'screens/budgets_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/transactions_screen.dart';
+import 'screens/wallets_screen.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -64,7 +65,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _switchToTransactions() {
     setState(() {
-      _currentIndex = 1;
+      _currentIndex = 2;
     });
   }
 
@@ -78,6 +79,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         index: _currentIndex,
         children: [
           DashboardScreen(onViewAllTransactions: _switchToTransactions),
+          const WalletsScreen(),
           const TransactionsScreen(),
           const BudgetsScreen(),
         ],
@@ -96,13 +98,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             label: strings.navDashboard,
           ),
           NavigationDestination(
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            selectedIcon: const Icon(Icons.account_balance_wallet),
+            label: strings.navWallets,
+          ),
+          NavigationDestination(
             icon: const Icon(Icons.receipt_long_outlined),
             selectedIcon: const Icon(Icons.receipt_long),
             label: strings.navTransactions,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: const Icon(Icons.account_balance_wallet),
+            icon: const Icon(Icons.pie_chart_outline),
+            selectedIcon: const Icon(Icons.pie_chart),
             label: strings.navBudgets,
           ),
         ],

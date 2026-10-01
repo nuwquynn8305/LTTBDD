@@ -21,10 +21,12 @@ class AppStrings {
   String get navDashboard => isVi ? 'Tổng quan' : 'Dashboard';
   String get navTransactions => isVi ? 'Giao dịch' : 'Transactions';
   String get navBudgets => isVi ? 'Ngân sách' : 'Budgets';
+  String get navWallets => isVi ? 'Ví tiền' : 'Wallets';
   String get navSettings => isVi ? 'Cài đặt' : 'Settings';
 
   // Dashboard & Balance Card
   String get currentBalance => isVi ? 'Số dư hiện tại' : 'Current Balance';
+  String get totalNetWorth => isVi ? 'Tổng tài sản các ví' : 'Total Net Worth';
   String get totalIncome => isVi ? 'Thu nhập' : 'Income';
   String get totalExpenses => isVi ? 'Chi tiêu' : 'Expenses';
   String get recentTransactions => isVi ? 'Giao dịch gần đây' : 'Recent Transactions';
@@ -33,6 +35,53 @@ class AppStrings {
   String get expenseByCategory => isVi ? 'Chi tiêu theo danh mục' : 'Expense by Category';
   String get noExpenseDataThisMonth =>
       isVi ? 'Chưa có dữ liệu chi tiêu tháng này' : 'No expense data this month';
+
+  // Wallets & Multi-Wallet
+  String get myWallets => isVi ? 'Ví & Tài khoản của tôi' : 'My Wallets & Accounts';
+  String get manageWallets => isVi ? 'Quản lý ví' : 'Manage Wallets';
+  String get addWallet => isVi ? 'Thêm ví mới' : 'Add Wallet';
+  String get editWallet => isVi ? 'Sửa thông tin ví' : 'Edit Wallet';
+  String get walletName => isVi ? 'Tên ví / Tài khoản' : 'Wallet / Account Name';
+  String get walletNameRequired => isVi ? 'Vui lòng nhập tên ví' : 'Please enter wallet name';
+  String get walletType => isVi ? 'Loại ví' : 'Wallet Type';
+  String get initialBalance => isVi ? 'Số dư ban đầu' : 'Initial Balance';
+  String get isDefaultWallet => isVi ? 'Đặt làm ví mặc định' : 'Set as default wallet';
+  String get defaultBadge => isVi ? 'Mặc định' : 'Default';
+  String get deleteWalletConfirmTitle => isVi ? 'Xóa ví này?' : 'Delete this wallet?';
+  String get deleteWalletConfirmMsg => isVi
+      ? 'Ví này sẽ bị xóa khỏi ứng dụng. Bạn có chắc chắn muốn tiếp tục?'
+      : 'This wallet will be deleted. Are you sure you want to continue?';
+  String get allWallets => isVi ? 'Tất cả ví' : 'All Wallets';
+  String get selectWallet => isVi ? 'Chọn ví' : 'Select Wallet';
+  String get paymentWallet => isVi ? 'Ví thanh toán / nhận tiền' : 'Payment / Account Wallet';
+
+  // Wallet Types
+  String get walletTypeCash => isVi ? 'Ví tiền mặt' : 'Cash Wallet';
+  String get walletTypeBank => isVi ? 'Tài khoản ngân hàng' : 'Bank Account';
+  String get walletTypeCredit => isVi ? 'Thẻ tín dụng' : 'Credit Card';
+  String get walletTypeSavings => isVi ? 'Sổ tiết kiệm' : 'Savings Account';
+  String get walletTypeOther => isVi ? 'Khác' : 'Other';
+
+  String getWalletTypeName(String type) {
+    return switch (type) {
+      'cash' => walletTypeCash,
+      'bank' => walletTypeBank,
+      'credit' => walletTypeCredit,
+      'savings' => walletTypeSavings,
+      _ => walletTypeOther,
+    };
+  }
+
+  // Transfer Between Wallets
+  String get transfer => isVi ? 'Chuyển tiền' : 'Transfer';
+  String get transferBetweenWallets => isVi ? 'Chuyển tiền giữa các ví' : 'Transfer Between Wallets';
+  String get fromWallet => isVi ? 'Từ ví (Ví nguồn)' : 'From Wallet (Source)';
+  String get toWallet => isVi ? 'Đến ví (Ví nhận)' : 'To Wallet (Destination)';
+  String get sameWalletError =>
+      isVi ? 'Ví chuyển và ví nhận không được trùng nhau' : 'Source and destination cannot be the same';
+  String get transferSuccess => isVi ? 'Chuyển tiền thành công!' : 'Transfer completed successfully!';
+  String get tabTransfer => isVi ? 'Chuyển khoản' : 'Transfer';
+  String get transferPrefix => isVi ? 'Chuyển' : 'Transfer';
 
   // Transactions Screen
   String get tabExpenses => isVi ? 'Khoản chi' : 'Expenses';
@@ -123,6 +172,7 @@ class AppStrings {
     'Đầu tư': 'Investment',
     'Kinh doanh': 'Business',
     'Quà tặng': 'Gift',
+    'Chuyển tiền': 'Transfer',
   };
 
   static const Map<String, String> _enToViCategory = {
@@ -141,6 +191,7 @@ class AppStrings {
     'Investment': 'Đầu tư',
     'Business': 'Kinh doanh',
     'Gift': 'Quà tặng',
+    'Transfer': 'Chuyển tiền',
   };
 
   String getCategoryTitle(String key) {

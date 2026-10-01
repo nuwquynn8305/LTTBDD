@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../models/transaction.dart';
 import '../models/budget.dart';
+import '../models/transaction.dart';
+import '../models/wallet.dart';
 
 class StorageService {
   static const String transactionBoxName = 'transactions';
   static const String budgetBoxName = 'budgets';
+  static const String walletBoxName = 'wallets';
   static const String settingsBoxName = 'settings';
 
   static final StorageService _instance = StorageService._internal();
@@ -31,11 +33,12 @@ class StorageService {
     _isInitializing = true;
 
     try {
-      // Only initialize Hive once
+      // Initialize Hive once
       if (!Hive.isAdapterRegistered(0)) {
         await Hive.initFlutter();
         Hive.registerAdapter(TransactionAdapter());
         Hive.registerAdapter(BudgetAdapter());
+        Hive.registerAdapter(WalletAdapter());
       }
 
       // Try to open boxes if not already open
@@ -47,18 +50,121 @@ class StorageService {
         await Hive.openBox<Budget>(budgetBoxName);
       }
 
+      if (!Hive.isBoxOpen(walletBoxName)) {
+        await Hive.openBox<Wallet>(walletBoxName);
+      }
+
       if (!Hive.isBoxOpen(settingsBoxName)) {
         await Hive.openBox(settingsBoxName);
       }
 
+      // Seed initial wallets if empty
+      await _seedDefaultWallets();
+
       _isInitialized = true;
     } catch (e) {
-      // Don't mark as initialized if init actually failed
       debugPrint('StorageService init error: $e');
       rethrow;
     } finally {
       _isInitializing = false;
     }
+  }
+
+  Future<void> _seedDefaultWallets() async {
+    final box = Hive.box<Wallet>(walletBoxName);
+    if (box.isEmpty) {
+      final defaultWallets = [
+        Wallet(
+          id: 'wallet_cash',
+          name: 'Ví tiền mặt',
+          type: 'cash',
+          initialBalance: 0,
+          icon: 'cash',
+          colorValue: 0xFF2E7D32, // Green
+          isDefault: true,
+          createdAt: DateTime.now(),
+        ),
+        Wallet(
+          id: 'wallet_bank',
+          name: 'Tài khoản ngân hàng',
+          type: 'bank',
+          initialBalance: 0,
+          icon: 'bank',
+          colorValue: 0xFF1565C0, // Blue
+          isDefault: false,
+          createdAt: DateTime.now(),
+        ),
+        Wallet(
+          id: 'wallet_credit',
+          name: 'Thẻ tín dụng',
+          type: 'credit',
+          initialBalance: 0,
+          icon: 'credit',
+          colorValue: 0xFFD84315, // Deep Orange
+          isDefault: false,
+          createdAt: DateTime.now(),
+        ),
+        Wallet(
+          id: 'wallet_savings',
+          name: 'Sổ tiết kiệm',
+          type: 'savings',
+          initialBalance: 0,
+          icon: 'savings',
+          colorValue: 0xFFF57F17, // Amber
+          isDefault: false,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      for (var w in defaultWallets) {
+        await box.put(w.id, w);
+      }
+    }
+  }
+
+  // Wallet methods
+  Future<List<Wallet>> getAllWallets() async {
+    await init();
+    final box = Hive.box<Wallet>(walletBoxName);
+    return box.values.toList();
+  }
+
+  Future<Wallet?> getWalletById(String id) async {
+    await init();
+    final box = Hive.box<Wallet>(walletBoxName);
+    return box.get(id);
+  }
+
+  Future<void> addWallet(Wallet wallet) async {
+    await init();
+    final box = Hive.box<Wallet>(walletBoxName);
+    if (wallet.isDefault) {
+      for (var w in box.values) {
+        if (w.isDefault && w.id != wallet.id) {
+          await box.put(w.id, w.copyWith(isDefault: false));
+        }
+      }
+    }
+    await box.put(wallet.id, wallet);
+  }
+
+  Future<void> updateWallet(Wallet wallet) async {
+    await init();
+    final box = Hive.box<Wallet>(walletBoxName);
+    if (wallet.isDefault) {
+      for (var w in box.values) {
+        if (w.isDefault && w.id != wallet.id) {
+          await box.put(w.id, w.copyWith(isDefault: false));
+        }
+      }
+    }
+    await box.put(wallet.id, wallet);
+  }
+
+  Future<void> deleteWallet(String id) async {
+    await init();
+    final box = Hive.box<Wallet>(walletBoxName);
+    await box.delete(id);
   }
 
   // Settings methods
@@ -108,6 +214,14 @@ class StorageService {
     await init();
     final box = Hive.box<Transaction>(transactionBoxName);
     return box.values.toList();
+  }
+
+  Future<List<Transaction>> getTransactionsByWallet(String walletId) async {
+    await init();
+    final box = Hive.box<Transaction>(transactionBoxName);
+    return box.values.where((t) {
+      return t.walletId == walletId || t.toWalletId == walletId;
+    }).toList();
   }
 
   Future<List<Transaction>> getTransactionsByType(String type) async {

@@ -6,6 +6,7 @@ import '../widgets/balance_card.dart';
 import '../widgets/expense_chart.dart';
 import '../widgets/recent_transactions_widget.dart';
 import '../widgets/theme_action_button.dart';
+import '../widgets/wallets_summary_widget.dart';
 
 class DashboardScreen extends ConsumerWidget {
   final VoidCallback? onViewAllTransactions;
@@ -26,6 +27,8 @@ class DashboardScreen extends ConsumerWidget {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const BalanceCard(),
+          const SizedBox(height: 6),
+          const WalletsSummaryWidget(),
           const SizedBox(height: 8),
           const ExpenseChart(),
           const SizedBox(height: 8),

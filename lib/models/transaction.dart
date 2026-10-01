@@ -20,10 +20,16 @@ class Transaction extends HiveObject {
   final DateTime date;
 
   @HiveField(5)
-  final String type; // 'income' or 'expense'
+  final String type; // 'income', 'expense', or 'transfer'
 
   @HiveField(6)
   final String? notes;
+
+  @HiveField(7)
+  final String? walletId; // Source wallet (or primary wallet)
+
+  @HiveField(8)
+  final String? toWalletId; // Destination wallet (for transfer)
 
   Transaction({
     required this.id,
@@ -33,6 +39,8 @@ class Transaction extends HiveObject {
     required this.date,
     required this.type,
     this.notes,
+    this.walletId,
+    this.toWalletId,
   });
 
   Transaction copyWith({
@@ -43,6 +51,8 @@ class Transaction extends HiveObject {
     DateTime? date,
     String? type,
     String? notes,
+    String? walletId,
+    String? toWalletId,
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -52,6 +62,8 @@ class Transaction extends HiveObject {
       date: date ?? this.date,
       type: type ?? this.type,
       notes: notes ?? this.notes,
+      walletId: walletId ?? this.walletId,
+      toWalletId: toWalletId ?? this.toWalletId,
     );
   }
 
@@ -64,6 +76,8 @@ class Transaction extends HiveObject {
       'date': date.toIso8601String(),
       'type': type,
       'notes': notes,
+      'walletId': walletId,
+      'toWalletId': toWalletId,
     };
   }
 
@@ -76,6 +90,8 @@ class Transaction extends HiveObject {
       date: DateTime.parse(json['date']),
       type: json['type'],
       notes: json['notes'],
+      walletId: json['walletId'],
+      toWalletId: json['toWalletId'],
     );
   }
 }
