@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/transaction_provider.dart';
 import 'package:intl/intl.dart';
+import '../providers/transaction_provider.dart';
 
 class BalanceCard extends ConsumerWidget {
   const BalanceCard({super.key});
@@ -9,6 +9,13 @@ class BalanceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final balanceAsync = ref.watch(balanceProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final currency = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: '₫',
+      decimalDigits: 0,
+    );
 
     return balanceAsync.when(
       data: (balance) {
@@ -16,59 +23,54 @@ class BalanceCard extends ConsumerWidget {
         final expensesAsync = ref.watch(totalExpensesProvider);
 
         return Card(
-          margin: const EdgeInsets.all(16),
+          margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          color: colorScheme.primaryContainer,
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Số dư hiện tại',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey,
+                  style: textTheme.labelLarge?.copyWith(
+                    color: colorScheme.onPrimaryContainer,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${NumberFormat('#,##,###').format(balance)} ₫',
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+                  currency.format(balance),
+                  style: textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onPrimaryContainer,
                   ),
                 ),
                 const SizedBox(height: 20),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    incomeAsync.when(
-                      data: (income) => _StatItem(
-                        label: 'Thu nhập',
-                        amount: income,
-                        color: Colors.green,
-                        icon: Icons.arrow_downward,
+                    Expanded(
+                      child: incomeAsync.when(
+                        data: (income) => _StatItem(
+                          label: 'Thu nhập',
+                          amount: income,
+                          icon: Icons.north_east,
+                          color: colorScheme.tertiary,
+                        ),
+                        loading: () => const LinearProgressIndicator(),
+                        error: (_, __) => const Text('Lỗi'),
                       ),
-                      loading: () => const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      error: (_, __) => const Text('Lỗi'),
                     ),
-                    expensesAsync.when(
-                      data: (expenses) => _StatItem(
-                        label: 'Chi tiêu',
-                        amount: expenses,
-                        color: Colors.red,
-                        icon: Icons.arrow_upward,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: expensesAsync.when(
+                        data: (expenses) => _StatItem(
+                          label: 'Chi tiêu',
+                          amount: expenses,
+                          icon: Icons.south_west,
+                          color: colorScheme.error,
+                        ),
+                        loading: () => const LinearProgressIndicator(),
+                        error: (_, __) => const Text('Lỗi'),
                       ),
-                      loading: () => const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      error: (_, __) => const Text('Lỗi'),
                     ),
                   ],
                 ),
@@ -78,14 +80,14 @@ class BalanceCard extends ConsumerWidget {
         );
       },
       loading: () => const Card(
-        margin: EdgeInsets.all(16),
+        margin: EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(32),
           child: Center(child: CircularProgressIndicator()),
         ),
       ),
       error: (error, stack) => Card(
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Text('Lỗi: $error'),
@@ -110,28 +112,48 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 20),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final currency = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: '₫',
+      decimalDigits: 0,
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  currency.format(amount),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+                ),
+              ],
             ),
-            Text(
-              '${NumberFormat('#,##,###').format(amount)} ₫',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }

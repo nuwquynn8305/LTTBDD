@@ -13,18 +13,22 @@ class RecentTransactionsWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recentTransactionsAsync = ref.watch(recentTransactionsProvider);
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return recentTransactionsAsync.when(
       data: (transactions) {
         if (transactions.isEmpty) {
-          return const Card(
-            margin: EdgeInsets.symmetric(horizontal: 16),
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Padding(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               child: Center(
                 child: Text(
                   'Chưa có giao dịch nào',
-                  style: TextStyle(color: Colors.grey),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
@@ -35,13 +39,14 @@ class RecentTransactionsWidget extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Giao dịch gần đây',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      'Giao dịch gần đây',
+                      style: textTheme.titleMedium,
+                    ),
                   ),
                   TextButton(
                     onPressed: onViewAll,
@@ -50,20 +55,23 @@ class RecentTransactionsWidget extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 8),
-            ListView.builder(
+            ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               itemCount: transactions.take(5).length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
-                final transaction = transactions[index];
-                return TransactionTile(transaction: transaction);
+                return TransactionTile(transaction: transactions[index]);
               },
             ),
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Padding(
+        padding: EdgeInsets.all(24),
+        child: Center(child: CircularProgressIndicator()),
+      ),
       error: (error, stack) =>
           const Center(child: Text('Lỗi khi tải giao dịch')),
     );
@@ -77,33 +85,43 @@ class TransactionTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isIncome = transaction.type == 'income';
-    final color = isIncome ? Colors.green : Colors.red;
-    final icon = Categories.getIcon(transaction.category);
+    final amountColor = isIncome ? colorScheme.tertiary : colorScheme.error;
+    final categoryColor = Categories.getMaterialColor(transaction.category);
+    final currency = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: '₫',
+      decimalDigits: 0,
+    );
 
     return Dismissible(
       key: Key(transaction.id),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        color: Colors.red,
-        child: const Icon(Icons.delete, color: Colors.white),
+        padding: const EdgeInsets.only(right: 24),
+        decoration: BoxDecoration(
+          color: colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(Icons.delete_outline, color: colorScheme.onErrorContainer),
       ),
       confirmDismiss: (direction) async {
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Xóa giao dịch'),
+            icon: const Icon(Icons.delete_outline),
+            title: const Text('Xóa giao dịch?'),
             content: const Text(
-              'Bạn có chắc chắn muốn xóa giao dịch này không?',
+              'Giao dịch này sẽ bị xóa khỏi thiết bị của bạn.',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
                 child: const Text('Hủy'),
               ),
-              TextButton(
+              FilledButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: const Text('Xóa'),
               ),
@@ -118,37 +136,22 @@ class TransactionTile extends ConsumerWidget {
             .deleteTransaction(transaction.id);
       },
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor: color.withOpacity(0.1),
-            child: Text(icon, style: const TextStyle(fontSize: 24)),
+            backgroundColor: categoryColor.withValues(alpha: 0.16),
+            foregroundColor: categoryColor,
+            child: Icon(Categories.getMaterialIcon(transaction.category)),
           ),
-          title: Text(
-            transaction.title,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
+          title: Text(transaction.title),
           subtitle: Text(
-            DateFormat('MMM dd, yyyy').format(transaction.date),
-            style: const TextStyle(color: Colors.grey),
+            DateFormat('dd/MM/yyyy', 'vi_VN').format(transaction.date),
           ),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${isIncome ? '+' : '-'}${NumberFormat('#,##,###').format(transaction.amount)} ₫',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                  fontSize: 16,
-                ),
-              ),
-              Text(
-                transaction.category,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-            ],
+          trailing: Text(
+            '${isIncome ? '+' : '-'}${currency.format(transaction.amount)}',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: amountColor,
+            ),
           ),
         ),
       ),

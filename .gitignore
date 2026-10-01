@@ -49,3 +49,7 @@ coverage/
 
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test_config.yaml
+
+# Chrome data
+.chrome_data/
+

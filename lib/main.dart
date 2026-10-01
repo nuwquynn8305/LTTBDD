@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/transactions_screen.dart';
 import 'screens/budgets_screen.dart';
@@ -13,6 +15,7 @@ void main() async {
 }
 
 Future<void> _initApp() async {
+  await initializeDateFormatting('vi_VN');
   final storageService = StorageService();
   await storageService.init();
 }
@@ -27,24 +30,31 @@ class MyApp extends ConsumerWidget {
     final darkTheme = ref.read(darkThemeProvider);
 
     return MaterialApp(
-      title: 'Expense Tracker',
+      title: 'Quản lý chi tiêu',
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: themeMode,
+      locale: const Locale('vi', 'VN'),
+      supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const HomeScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   void _switchToTransactions() {
@@ -55,14 +65,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screens = [
-      DashboardScreen(onViewAllTransactions: _switchToTransactions),
-      const TransactionsScreen(),
-      const BudgetsScreen(),
-    ];
-
     return Scaffold(
-      body: screens[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          DashboardScreen(onViewAllTransactions: _switchToTransactions),
+          const TransactionsScreen(),
+          const BudgetsScreen(),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
@@ -85,17 +96,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: Icon(Icons.account_balance_wallet_outlined),
             selectedIcon: Icon(Icons.account_balance_wallet),
             label: 'Ngân sách',
-          ),
-        ],
-      ),
-      appBar: AppBar(
-        title: const Text('Quản lý chi tiêu'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.brightness_6),
-            onPressed: () {
-              ref.read(themeNotifierProvider.notifier).toggleTheme();
-            },
           ),
         ],
       ),

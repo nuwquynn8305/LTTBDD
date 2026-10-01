@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../models/budget.dart';
 import '../providers/budget_provider.dart';
 import '../utils/categories.dart';
@@ -27,7 +26,7 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     super.initState();
     if (widget.budget != null) {
       final b = widget.budget!;
-      _amountController.text = b.limit.toString();
+      _amountController.text = b.limit.toStringAsFixed(0);
       _selectedCategory = b.category;
       _selectedMonth = b.month;
       _selectedYear = b.year;
@@ -41,47 +40,31 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
   }
 
   Future<void> _selectMonthYear() async {
-    // First show month picker
+    final colorScheme = Theme.of(context).colorScheme;
     final selectedMonth = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Chọn tháng'),
         content: SizedBox(
           width: 300,
-          height: 300,
+          height: 280,
           child: GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              childAspectRatio: 2,
+              childAspectRatio: 1.6,
             ),
             itemCount: 12,
             itemBuilder: (context, index) {
               final month = index + 1;
-              final monthName = 'Tháng $month';
               final isSelected = month == _selectedMonth;
 
-              return InkWell(
-                onTap: () => Navigator.pop(context, month),
-                child: Container(
-                  margin: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: isSelected ? Theme.of(context).primaryColor : null,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isSelected
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      monthName,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : null,
-                        fontWeight: isSelected ? FontWeight.bold : null,
-                      ),
-                    ),
-                  ),
+              return Padding(
+                padding: const EdgeInsets.all(4),
+                child: FilterChip(
+                  selected: isSelected,
+                  label: Text('$month'),
+                  onSelected: (_) => Navigator.pop(context, month),
+                  selectedColor: colorScheme.secondaryContainer,
                 ),
               );
             },
@@ -96,9 +79,8 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
       ),
     );
 
-    if (selectedMonth == null) return;
+    if (selectedMonth == null || !mounted) return;
 
-    // Then show year picker
     final selectedYear = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
@@ -140,9 +122,11 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
     final budget = Budget(
       id:
           widget.budget?.id ??
-          '${_selectedCategory}_${_selectedMonth}_${_selectedYear}',
+          '${_selectedCategory}_${_selectedMonth}_$_selectedYear',
       category: _selectedCategory,
-      limit: double.parse(_amountController.text.replaceAll('.', '').replaceAll(',', '')),
+      limit: double.parse(
+        _amountController.text.replaceAll('.', '').replaceAll(',', ''),
+      ),
       month: _selectedMonth,
       year: _selectedYear,
     );
@@ -160,34 +144,32 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.budget != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.budget == null ? 'Thêm ngân sách' : 'Sửa ngân sách'),
+        title: Text(isEditing ? 'Sửa ngân sách' : 'Thêm ngân sách'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Category
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Danh mục',
-                  prefixIcon: Icon(Icons.category),
+                  prefixIcon: Icon(Icons.category_outlined),
                 ),
                 items: Categories.expenseCategories.map((category) {
                   return DropdownMenuItem(
                     value: category,
                     child: Row(
                       children: [
-                        Text(
-                          Categories.getIcon(category),
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        const SizedBox(width: 8),
+                        Icon(Categories.getMaterialIcon(category)),
+                        const SizedBox(width: 12),
                         Text(category),
                       ],
                     ),
@@ -200,13 +182,11 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                 },
               ),
               const SizedBox(height: 16),
-
-              // Amount
               TextFormField(
                 controller: _amountController,
                 decoration: const InputDecoration(
                   labelText: 'Giới hạn ngân sách',
-                  prefixIcon: Icon(Icons.attach_money),
+                  prefixIcon: Icon(Icons.payments_outlined),
                   suffixText: '₫',
                 ),
                 keyboardType: TextInputType.number,
@@ -214,7 +194,9 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Vui lòng nhập giới hạn ngân sách';
                   }
-                  final cleanValue = value.replaceAll('.', '').replaceAll(',', '');
+                  final cleanValue = value
+                      .replaceAll('.', '')
+                      .replaceAll(',', '');
                   if (double.tryParse(cleanValue) == null ||
                       double.parse(cleanValue) <= 0) {
                     return 'Vui lòng nhập số tiền hợp lệ';
@@ -223,35 +205,21 @@ class _AddBudgetScreenState extends ConsumerState<AddBudgetScreen> {
                 },
               ),
               const SizedBox(height: 16),
-
-              // Month & Year
               InkWell(
                 onTap: _selectMonthYear,
                 child: InputDecorator(
                   decoration: const InputDecoration(
-                    labelText: 'Tháng & Năm',
-                    prefixIcon: Icon(Icons.calendar_today),
+                    labelText: 'Tháng & năm',
+                    prefixIcon: Icon(Icons.calendar_month_outlined),
                   ),
-                  child: Text(
-                    'Tháng $_selectedMonth/$_selectedYear',
-                  ),
+                  child: Text('Tháng $_selectedMonth/$_selectedYear'),
                 ),
               ),
               const SizedBox(height: 32),
-
-              // Save Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _saveBudget,
-                  icon: const Icon(Icons.save),
-                  label: Text(
-                    widget.budget == null ? 'Thêm ngân sách' : 'Cập nhật ngân sách',
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
+              FilledButton.icon(
+                onPressed: _saveBudget,
+                icon: const Icon(Icons.check),
+                label: Text(isEditing ? 'Lưu thay đổi' : 'Thêm ngân sách'),
               ),
             ],
           ),

@@ -12,67 +12,59 @@ class ExpenseChart extends ConsumerWidget {
     final now = DateTime.now();
     final currentMonth = DateTime(now.year, now.month);
     final expenseAsync = ref.watch(expenseByCategoryProvider(currentMonth));
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Biểu đồ chi tiêu',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text('Chi tiêu theo danh mục', style: textTheme.titleMedium),
             const SizedBox(height: 16),
             SizedBox(
-              height: 200,
+              height: 220,
               child: expenseAsync.when(
                 data: (spending) {
-                  if (spending.isEmpty || spending.values.every((v) => v == 0)) {
-                    return const Center(
+                  if (spending.isEmpty ||
+                      spending.values.every((v) => v == 0)) {
+                    return Center(
                       child: Text(
                         'Chưa có dữ liệu chi tiêu tháng này',
-                        style: TextStyle(color: Colors.grey),
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     );
                   }
 
-                  // Calculate total to show percentages
                   final total = spending.values.reduce((a, b) => a + b);
-                  
-                  // Filter out zero values and create sections
-                  final validCategories = spending.entries.where((e) => e.value > 0).toList();
-                  
-                  // Sort by amount descending
-                  validCategories.sort((a, b) => b.value.compareTo(a.value));
+                  final validCategories = spending.entries
+                      .where((e) => e.value > 0)
+                      .toList()
+                    ..sort((a, b) => b.value.compareTo(a.value));
 
                   return Row(
                     children: [
                       Expanded(
-                        flex: 2,
+                        flex: 3,
                         child: PieChart(
                           PieChartData(
                             sectionsSpace: 2,
-                            centerSpaceRadius: 40,
-                            sections: validCategories.asMap().entries.map((entry) {
-                              // final index = entry.key;
-                              final data = entry.value;
-                              final percentage = (data.value / total * 100);
-                              
-                              final colorList = Categories.getColor(data.key);
-                              final color = Color.fromARGB(colorList[0], colorList[1], colorList[2], colorList[3]);
-                              
+                            centerSpaceRadius: 44,
+                            sections: validCategories.map((data) {
+                              final percentage = data.value / total * 100;
+                              final color = Categories.getMaterialColor(
+                                data.key,
+                              );
                               return PieChartSectionData(
                                 color: color,
                                 value: data.value,
                                 title: '${percentage.toStringAsFixed(0)}%',
-                                radius: 50,
-                                titleStyle: const TextStyle(
-                                  fontSize: 12,
+                                radius: 48,
+                                titleStyle: textTheme.labelSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
@@ -81,23 +73,21 @@ class ExpenseChart extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       Expanded(
-                        flex: 1,
+                        flex: 2,
                         child: ListView.builder(
-                          shrinkWrap: true,
                           itemCount: validCategories.length,
                           itemBuilder: (context, index) {
                             final item = validCategories[index];
-                            final colorList = Categories.getColor(item.key);
-                            final color = Color.fromARGB(colorList[0], colorList[1], colorList[2], colorList[3]);
+                            final color = Categories.getMaterialColor(item.key);
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Row(
                                 children: [
                                   Container(
-                                    width: 12,
-                                    height: 12,
+                                    width: 10,
+                                    height: 10,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: color,
@@ -107,7 +97,7 @@ class ExpenseChart extends ConsumerWidget {
                                   Expanded(
                                     child: Text(
                                       item.key,
-                                      style: const TextStyle(fontSize: 12),
+                                      style: textTheme.bodySmall,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
@@ -121,7 +111,8 @@ class ExpenseChart extends ConsumerWidget {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => const Center(child: Text('Lỗi khi tải biểu đồ')),
+                error: (error, stack) =>
+                    const Center(child: Text('Lỗi khi tải biểu đồ')),
               ),
             ),
           ],

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Categories {
   static const List<String> expenseCategories = [
     'Ăn uống',
@@ -57,8 +59,35 @@ class Categories {
     'Quà tặng': [0xFF, 0xFF, 0x57, 0x22], // Amber
   };
 
+  static const Map<String, IconData> categoryMaterialIcons = {
+    'Ăn uống': Icons.restaurant,
+    'Mua sắm': Icons.shopping_bag_outlined,
+    'Di chuyển': Icons.directions_car_outlined,
+    'Hóa đơn & Tiện ích': Icons.lightbulb_outline,
+    'Giải trí': Icons.movie_outlined,
+    'Sức khỏe': Icons.local_hospital_outlined,
+    'Giáo dục': Icons.menu_book_outlined,
+    'Du lịch': Icons.flight_outlined,
+    'Quà tặng & Quyên góp': Icons.card_giftcard,
+    'Khác': Icons.inventory_2_outlined,
+    'Tiền lương': Icons.payments_outlined,
+    'Freelance': Icons.work_outline,
+    'Đầu tư': Icons.trending_up,
+    'Kinh doanh': Icons.storefront_outlined,
+    'Quà tặng': Icons.card_giftcard,
+  };
+
   static String getIcon(String category) {
     return categoryIcons[category] ?? '📦';
+  }
+
+  static IconData getMaterialIcon(String category) {
+    return categoryMaterialIcons[category] ?? Icons.inventory_2_outlined;
+  }
+
+  static Color getMaterialColor(String category) {
+    final values = getColor(category);
+    return Color.fromARGB(values[0], values[1], values[2], values[3]);
   }
 
   static List<int> getColor(String category) {
