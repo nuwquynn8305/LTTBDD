@@ -104,6 +104,30 @@ class AppStrings {
   String get save => isVi ? 'Lưu' : 'Save';
   String get saveChanges => isVi ? 'Lưu thay đổi' : 'Save Changes';
 
+  // Transaction Filters
+  String get filterTransactions => isVi ? 'Lọc giao dịch' : 'Filter Transactions';
+  String get dateRange => isVi ? 'Khoảng ngày' : 'Date Range';
+  String get fromDate => isVi ? 'Từ ngày' : 'From';
+  String get toDate => isVi ? 'Đến ngày' : 'To';
+  String get filterByCategory => isVi ? 'Theo danh mục' : 'By Category';
+  String get filterByWallet => isVi ? 'Theo ví' : 'By Wallet';
+  String get allCategories => isVi ? 'Tất cả danh mục' : 'All Categories';
+  String get clearFilters => isVi ? 'Xóa bộ lọc' : 'Clear Filters';
+  String get applyFilters => isVi ? 'Áp dụng' : 'Apply';
+  String get filtersActive => isVi ? 'Đang lọc' : 'Filtered';
+  String get noMatchingTransactions => isVi ? 'Không tìm thấy giao dịch' : 'No matching transactions';
+  String get noMatchingTransactionsDesc => isVi
+      ? 'Thử thay đổi bộ lọc hoặc xóa bộ lọc để xem tất cả.'
+      : 'Try changing filters or clear filters to see all.';
+  String get pickStartDate => isVi ? 'Chọn ngày bắt đầu' : 'Pick start date';
+  String get pickEndDate => isVi ? 'Chọn ngày kết thúc' : 'Pick end date';
+  String get today => isVi ? 'Hôm nay' : 'Today';
+  String get thisWeek => isVi ? 'Tuần này' : 'This Week';
+  String get thisMonth => isVi ? 'Tháng này' : 'This Month';
+  String get last30Days => isVi ? '30 ngày qua' : 'Last 30 Days';
+  String get last90Days => isVi ? '90 ngày qua' : 'Last 90 Days';
+  String get customRange => isVi ? 'Tùy chọn' : 'Custom';
+
   // Add / Edit Transaction Form
   String get titleLabel => isVi ? 'Tiêu đề' : 'Title';
   String get titleRequired => isVi ? 'Vui lòng nhập tiêu đề' : 'Please enter a title';
