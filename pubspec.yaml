@@ -59,6 +59,9 @@ dependencies:
   
   # Animations
   flutter_staggered_animations: ^1.1.1
+  csv: ^8.0.0
+  pdf: ^3.13.1
+  printing: ^5.13.1
 
 dev_dependencies:
   flutter_test:

@@ -12,6 +12,7 @@ import '../utils/categories.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/theme_action_button.dart';
 import 'add_transaction_screen.dart';
+import 'export_screen.dart';
 
 // ── Filter State ──
 
@@ -119,6 +120,17 @@ class TransactionsScreen extends ConsumerWidget {
                     ),
                   ),
               ],
+            ),
+            // Export button
+            IconButton(
+              icon: const Icon(Icons.file_upload_outlined),
+              tooltip: strings.isVi ? 'Xuất dữ liệu' : 'Export Data',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ExportScreen()),
+                );
+              },
             ),
             const ThemeActionButton(),
           ],
