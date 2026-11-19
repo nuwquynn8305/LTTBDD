@@ -5,6 +5,10 @@ import '../models/app_currency.dart';
 import '../providers/currency_provider.dart';
 import '../providers/locale_provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/budget_provider.dart';
+import '../providers/transaction_provider.dart';
+import '../providers/wallet_provider.dart';
+import '../services/storage_service.dart';
 
 class ThemeActionButton extends ConsumerWidget {
   const ThemeActionButton({super.key});
@@ -140,6 +144,24 @@ class ThemeActionButton extends ConsumerWidget {
                 ],
               ),
             ),
+            const PopupMenuDivider(),
+
+            // Demo Data
+            PopupMenuItem<String>(
+              value: 'seed_demo_data',
+              child: Row(
+                children: [
+                  const Icon(Icons.auto_fix_high, size: 20, color: Colors.orange),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      strings.isVi ? 'Nạp lại dữ liệu mẫu' : 'Load Demo Data',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
           onSelected: (value) {
             if (value.startsWith('curr_')) {
@@ -151,10 +173,66 @@ class ThemeActionButton extends ConsumerWidget {
               ref.read(themeNotifierProvider.notifier).setTheme(ThemeMode.light);
             } else if (value == 'theme_dark') {
               ref.read(themeNotifierProvider.notifier).setTheme(ThemeMode.dark);
+            } else if (value == 'seed_demo_data') {
+              _showSeedConfirmDialog(context, ref, strings);
             }
           },
         ),
       ],
+    );
+  }
+
+  void _showSeedConfirmDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AppStrings strings,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.auto_fix_high, color: Colors.orange),
+            const SizedBox(width: 8),
+            Text(strings.isVi ? 'Nạp dữ liệu mẫu' : 'Load Demo Data'),
+          ],
+        ),
+        content: Text(
+          strings.isVi
+              ? 'Hệ thống sẽ tạo 13 giao dịch mẫu (Thu, Chi, Chuyển tiền) và 4 hạn mức ngân sách tháng này để phục vụ demo / thuyết trình.\n\nBạn có muốn tiếp tục?'
+              : 'This will seed 13 sample transactions (Income, Expense, Transfer) and 4 monthly budgets for demo / presentation.\n\nDo you want to continue?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(strings.cancel),
+          ),
+          FilledButton.icon(
+            icon: const Icon(Icons.check, size: 18),
+            label: Text(strings.isVi ? 'Đồng ý nạp' : 'Confirm'),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await StorageService().seedSampleData(force: true);
+              ref.invalidate(transactionsProvider);
+              ref.invalidate(walletsProvider);
+              ref.invalidate(budgetsProvider);
+
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      strings.isVi
+                          ? 'Đã nạp sẵn dữ liệu mẫu thành công!'
+                          : 'Sample demo data loaded successfully!',
+                    ),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }
